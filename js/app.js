@@ -187,10 +187,13 @@
     return cv;
   }
   function takeaway(x, y, w, rot, cls) {
-    const c = D.share, card = h("div", "takeaway " + cls, undefined, { left: px(x), top: px(y), width: px(w), transform: `rotate(${rot}deg)` });
+    const c = D.share, card = h("div", "takeaway " + cls, undefined, { left: px(x), top: px(y), width: px(w) });
+    card.style.setProperty("--rot", rot + "deg");
     card.append(h("span", "lbl", esc(tr(c.label))), qrCanvas(c.qr, w - 84, Math.round(x + y)), h("span", "url", `${esc(c.show)}<small>${esc(tr(c.hint))}</small>`));
     return card;
   }
+  // the card is laid on the sheet last, once the pencil drawing is (nearly) done
+  const reveal = (card, f, from) => card.style.setProperty("--rev", ease(clamp((f - from) / (1 - from))).toFixed(3));
 
   function coverSlide() {
     const c = D.cover;
@@ -199,7 +202,8 @@
     labelRow(el, esc(tr(c.kicker)), esc(tr(c.place)));
     const col = h("div", "col", undefined, { left: px(L), top: px(tb.bottom + 64), width: px(1300) });
     col.append(h("div", "cover-title a2", esc(tr(c.title))), h("div", "cover-by a3", esc(tr(c.by))));
-    el.append(col, takeaway(1466, 340, 304, -2.2, "a4"));
+    const card = takeaway(1466, 340, 304, -2.2, "");
+    el.append(col, card);
     const n = D.apps.length, cw = (R - L) / n;
     D.apps.forEach((a, i) => el.append(h("div", "lbl tiny a4", pad2(i + 1), { left: px(L + cw * i), width: px(cw), top: px(950), textAlign: "center" })));
     return {
@@ -208,6 +212,7 @@
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.25), 11);
         rule(pen, L, 722, R, 722, clamp(f * 2 - 0.6), 3);
+        reveal(card, f, 0.82);
       },
     };
   }
@@ -433,7 +438,8 @@
     const tb = titleBlock(tr(c.big), 160, 1180, 260);
     const el = h("section", "layer ink-paper end");
     labelRow(el, esc(tr(c.label)), esc(tr(c.contact)));
-    el.append(takeaway(1466, 156, 304, 1.8, "a4"));
+    const card = takeaway(1466, 156, 304, 1.8, "");
+    el.append(card);
     const qs = tr(c.questions), top = 560, gy = (B - top) / qs.length;
     qs.forEach((q, i) => el.append(h("div", "question a" + (i + 2), `<span class="lbl">${ROMAN[i]}</span><span>${esc(q)}</span>`, { left: px(L), top: px(top + i * gy), width: px(R - L), height: px(gy) })));
     return {
@@ -441,6 +447,7 @@
       objs: [],
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 977);
+        reveal(card, f, 0.8);
         ticks(pen, f, this.sheet);
         for (let i = 0; i <= qs.length; i++) rule(pen, L, top + i * gy, R, top + i * gy, clamp(f * 2 - 0.4 - i * 0.15), 60 + i, { w: 0.6 });
       },
