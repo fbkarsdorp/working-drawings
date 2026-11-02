@@ -36,8 +36,8 @@ Open `index.html` in Chrome (double-click works, no server or network needed), o
    better to hand the data over ourselves. The ring shows where each app got its data
    (solid line: dump, export or download; dashed: scraped or parsed).
 10. **What this asks of us**: the weight shifts from building interfaces to looking after the
-    data; three proposals: databanks as foundations, FAIR data (starting with the catalogue),
-    and an API rather than only rate limits.
+    data; four proposals: databanks as foundations, FAIR data (starting with the catalogue),
+    an API rather than only rate limits, and teaching it (find out where people get stuck).
 11. **This deck**: the presentation itself as a twelfth drawing: hours and prompts from
     this project's own logs (counted like the others), and the cover taped on as a print (`shots/deck.jpg`). Recount before the meeting.
 12. **Thank you**: two questions for discussion: judging digital work, and extraction
