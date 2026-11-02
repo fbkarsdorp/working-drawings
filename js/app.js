@@ -968,7 +968,7 @@
   // Visitors keep the legend in view until they turn the first sheet; when presenting it
   // shows only while the mouse moves.
   const legend = document.createElement("div");
-  legend.className = "legend" + (probeLocal ? "" : " keep");
+  legend.className = "keybar" + (probeLocal ? "" : " keep");
   stage.append(legend);
   legend.onclick = (e) => { const b = e.target.closest("button"); if (b) dispatchEvent(new KeyboardEvent("keydown", { key: b.dataset.k })); };
   help.onclick = (e) => { if (e.target === help || e.target.closest(".close")) toggleHelp(false); };

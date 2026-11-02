@@ -249,15 +249,15 @@ body.idle #viewer .vbar { opacity: .25; }
 #small .anyway { border: 0; background: none; color: var(--graphite); opacity: .6; font: 500 15px/1 "Geist", system-ui, sans-serif; text-decoration: underline; cursor: pointer; padding: 8px; }
 
 /* key legend, bottom right of every sheet */
-.legend { position: absolute; right: 150px; top: 1014px; display: flex; align-items: center; gap: 26px; color: var(--graphite); opacity: .6;
+.keybar { position: absolute; right: 150px; top: 1014px; display: flex; align-items: center; gap: 26px; color: var(--graphite); opacity: .6;
   font: 700 15px/1 "Geist", system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; transition: opacity .4s ease; }
-.legend button { pointer-events: auto; background: none; border: 0; padding: 6px 2px; margin: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
-.legend button:hover { color: var(--red); opacity: 1; }
-.legend .arr { font-size: 22px; letter-spacing: 0; padding: 2px 4px; margin-right: -18px; }
-.legend span { margin-left: 4px; }
-.legend b { color: var(--red); margin-right: 8px; }
-body.idle .legend:not(.keep), .legend.off { opacity: 0; }
-body.idle .legend:not(.keep) button, .legend.off button { pointer-events: none; }
+.keybar button { pointer-events: auto; background: none; border: 0; padding: 6px 2px; margin: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.keybar button:hover { color: var(--red); opacity: 1; }
+.keybar .arr { font-size: 22px; letter-spacing: 0; padding: 2px 4px; margin-right: -18px; }
+.keybar span { margin-left: 4px; }
+.keybar b { color: var(--red); margin-right: 8px; }
+body.idle .keybar:not(.keep), .keybar.off { opacity: 0; }
+body.idle .keybar:not(.keep) button, .keybar.off button { pointer-events: none; }
 
 /* the meta sheet: the deck's own cover, taped on as a print */
 .snap { box-sizing: border-box; padding: 14px; background: #f7f3e8; transform: rotate(1.6deg);
