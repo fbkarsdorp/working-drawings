@@ -154,6 +154,44 @@
   let slides = [];
 
   // 1 · cover
+  // the take-away card: a slip of paper taped onto the sheet, with the deck's address as a
+  // QR code drawn in graphite. Dark modules are filled solid (with a little wobble and grain)
+  // so phones still read it from across the room.
+  function qrCanvas(rows, size, seed) {
+    const n = rows.length, k = 2, cv = document.createElement("canvas");
+    cv.width = cv.height = size * k; cv.style.width = cv.style.height = px(size);
+    const x = cv.getContext("2d"), m = (size * k) / n;
+    let r = seed * 9301 + 49297;
+    const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+    x.fillStyle = "#26231f";
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; ) {
+        if (rows[i][j] !== "1") { j++; continue; }
+        let e = j; while (e < n && rows[i][e] === "1") e++;
+        const j0 = (rnd() - 0.5) * 0.12, j1 = (rnd() - 0.5) * 0.12, t0 = (rnd() - 0.5) * 0.1, t1 = (rnd() - 0.5) * 0.1;
+        x.globalAlpha = 0.86 + rnd() * 0.1;
+        x.beginPath();
+        x.moveTo((j + j0) * m, (i + t0) * m); x.lineTo((e + j1) * m, (i + t1) * m);
+        x.lineTo((e + j1) * m, (i + 1 + t0) * m); x.lineTo((j + j0) * m, (i + 1 + t1) * m);
+        x.closePath(); x.fill();
+        j = e;
+      }
+    }
+    // pencil grain: short light strokes across the graphite
+    x.globalAlpha = 0.16; x.strokeStyle = "#f3eee2"; x.lineWidth = 1;
+    for (let q = 0; q < n * n * 1.4; q++) {
+      const px0 = rnd() * size * k, py0 = rnd() * size * k, l = 3 + rnd() * 5;
+      x.beginPath(); x.moveTo(px0, py0); x.lineTo(px0 + l, py0 - l); x.stroke();
+    }
+    x.globalAlpha = 1;
+    return cv;
+  }
+  function takeaway(x, y, w, rot, cls) {
+    const c = D.share, card = h("div", "takeaway " + cls, undefined, { left: px(x), top: px(y), width: px(w), transform: `rotate(${rot}deg)` });
+    card.append(h("span", "lbl", esc(tr(c.label))), qrCanvas(c.qr, w - 64, Math.round(x + y)), h("span", "url", esc(c.show)));
+    return card;
+  }
+
   function coverSlide() {
     const c = D.cover;
     const tb = titleBlock(tr(c.big), 200, R - L, 300);
@@ -161,7 +199,7 @@
     labelRow(el, esc(tr(c.kicker)), esc(tr(c.place)));
     const col = h("div", "col", undefined, { left: px(L), top: px(tb.bottom + 64), width: px(1300) });
     col.append(h("div", "cover-title a2", esc(tr(c.title))), h("div", "cover-by a3", esc(tr(c.by))));
-    el.append(col);
+    el.append(col, takeaway(1466, 340, 304, -2.2, "a4"));
     const n = D.apps.length, cw = (R - L) / n;
     D.apps.forEach((a, i) => el.append(h("div", "lbl tiny a4", pad2(i + 1), { left: px(L + cw * i), width: px(cw), top: px(950), textAlign: "center" })));
     return {
@@ -395,11 +433,12 @@
     const tb = titleBlock(tr(c.big), 160, 1180, 260);
     const el = h("section", "layer ink-paper end");
     labelRow(el, esc(tr(c.label)), esc(tr(c.contact)));
-    const qs = tr(c.questions), top = 450, gy = (B - top) / qs.length;
+    el.append(takeaway(1466, 156, 304, 1.8, "a4"));
+    const qs = tr(c.questions), top = 560, gy = (B - top) / qs.length;
     qs.forEach((q, i) => el.append(h("div", "question a" + (i + 2), `<span class="lbl">${ROMAN[i]}</span><span>${esc(q)}</span>`, { left: px(L), top: px(top + i * gy), width: px(R - L), height: px(gy) })));
     return {
       kind: "end", el, dur: 2.2,
-      objs: [place("emblem", 1580, 262, 150, { delay: 0.2 })],
+      objs: [],
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 977);
         ticks(pen, f, this.sheet);

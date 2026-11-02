@@ -45,6 +45,17 @@ shows the data route and the build time.
 
 ## Sharing the deck
 
+The deck is online at <https://www.karsdorp.io/working-drawings/> (GitHub Pages, repo
+`fbkarsdorp/working-drawings`, served from `main`). To update it: commit and push; the page
+follows within a minute or two. The cover and the last sheet carry a taped card with a
+QR code for that address. If the address ever changes, update `share` in `js/content.js`,
+including the QR rows (`segno.make(url, error="q")`).
+
+Opened from a public address, the deck does not probe `localhost` (that would trigger the
+browser's local-network prompt), so the three local apps play their demos. Opened from this
+laptop, or with `?live` added to the URL, it checks and opens running apps live.
+
+
 The deck is static and runs from any web server or from the file itself. Three apps stay
 on the presenter's laptop: the Liederenbank and Dwaallicht hold full copies of their
 databanks, and Wat bewaart het Meertens is built from those same local copies. Each has a
