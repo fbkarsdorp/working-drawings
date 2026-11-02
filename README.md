@@ -63,7 +63,8 @@ laptop, or with `?live` added to the URL, it checks and opens running apps live.
 The deck is static and runs from any web server or from the file itself. Three apps stay
 on the presenter's laptop: the Liederenbank and Dwaallicht hold full copies of their
 databanks, and Wat bewaart het Meertens is built from those same local copies. Each has a
-recorded demo in `shots/*-demo.mp4`. When one of them does not answer, its box plays the
+recorded demo in `shots/*-demo.mp4` (Wat bewaart: Katwijk aan Zee, then korenbloem, from the
+PLAND page on to a Sage about the korenpater). When one of them does not answer, its box plays the
 demo with the note "the app runs on the presenter's laptop"; when it is running, it opens
 live as before.
 

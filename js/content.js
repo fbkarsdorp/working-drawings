@@ -373,7 +373,7 @@ window.DECK = {
       big: { en: ["WAT BEWAART", "HET MEERTENS?"], nl: ["WAT BEWAART", "HET MEERTENS?"] },
       url: "http://localhost:5191/vraag.html", where: "localhost:5191 · mock-up",
       shot: "shots/vraag.jpg", hours: null, prompts: null, solid: false,
-      demo: "shots/vraag-demo.mp4", demoCap: { en: "Katwijk aan Zee, and one step onward", nl: "Katwijk aan Zee, en één stap verder" },
+      demo: "shots/vraag-demo.mp4", demoCap: { en: "Katwijk aan Zee, then the cornflower", nl: "Katwijk aan Zee, daarna de korenbloem" },
       route: { en: "scraped, plus several dumps", nl: "gescrapet, plus enkele dumps" },
       tagline: { en: "One front door: type a place, a name, a year or a word, and get a few places to start.", nl: "Eén voordeur: typ een plaats, naam, jaar of woord en krijg een paar startpunten." },
       points: {

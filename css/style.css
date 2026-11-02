@@ -185,6 +185,7 @@ body.idle #viewer .vbar { opacity: .25; }
 @keyframes nudge { 50% { transform: translateX(4px); } }
 
 /* the walk laid on the page */
+.layer.dim.clear > *, .layer.dim.clear .col > * { opacity: 0 !important; }
 .layer.dim > *, .layer.dim .col > * { opacity: .06 !important; transition: opacity .4s ease !important; transition-delay: 0s !important; pointer-events: none !important; }
 .clipui { position: absolute; --fg: var(--graphite); --acc: var(--red); color: var(--fg); display: flex; justify-content: space-between; align-items: baseline; opacity: 0; transition: opacity .35s ease; }
 .clipui.on { opacity: 1; transition-delay: .35s; }

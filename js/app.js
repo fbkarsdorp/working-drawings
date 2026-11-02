@@ -648,6 +648,7 @@
     boxui.hidden = false; boxui.classList.remove("ended");
     requestAnimationFrame(() => boxui.classList.add("on"));
     slides[cur].el.classList.add("dim");
+    slides[cur].el.classList.toggle("clear", box.local); // a recorded app: no sheet text over it
   }
   // the walk becomes the room itself, in the same place on the page
   function boxToLive() {
@@ -673,7 +674,7 @@
     box.closing = true; box.t0 = now;
     boxui.classList.remove("on");
     if (box.frame) { const f = box.frame; f.classList.remove("on"); setTimeout(() => f.remove(), 260); }
-    slides[cur].el.classList.remove("dim");
+    slides[cur].el.classList.remove("dim", "clear");
     window.focus();
   }
   function finishBox() {
@@ -802,7 +803,7 @@
     i = clamp(i, 0, slides.length - 1);
     if (i === cur && !instant) return;
     if (trans) endTrans();
-    if (box) { slides[cur].el.classList.remove("dim"); boxui.classList.remove("on"); finishBox(); }
+    if (box) { slides[cur].el.classList.remove("dim", "clear"); boxui.classList.remove("on"); finishBox(); }
     const A = slides[cur], S = slides[i], from = cur;
     cur = i;
     try { history.replaceState(null, "", "#" + i); } catch (e) { /* file:// */ }
