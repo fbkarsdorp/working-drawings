@@ -12,7 +12,7 @@ window.DECK = {
     big: { en: ["WORKING DRAWINGS"], nl: ["WERKTEKENINGEN"] },
     kicker: { en: "Meertens Instituut — Scientific Committee", nl: "Meertens Instituut — Wetenschappelijke Commissie" },
     place: { en: "Amsterdam", nl: "Amsterdam" },
-    title: { en: "What eleven experiments with Claude say about our collections", nl: "Wat elf experimenten met Claude zeggen over onze collecties" },
+    title: { en: "Every day a new interface", nl: "Elke dag een nieuwe interface" },
     by: { en: "Folgert Karsdorp · 6 November 2026", nl: "Folgert Karsdorp · 6 november 2026" },
   },
 
