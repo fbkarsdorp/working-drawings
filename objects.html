@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Objects sheet</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script src="js/opentype.min.js"></script>
+<script src="js/font-geist-black.js"></script>
+<script src="js/mesh.js"></script>
+<script src="js/objects.js"></script>
+<script src="js/ink.js"></script>
+<script>
+// A proof sheet of every object in one ink: objects.html?ink=paper|blueprint|holo&t=seconds
+const q = new URLSearchParams(location.search), ink = q.get("ink") || "paper", T = q.get("t");
+const c = document.getElementById("c"), ctx = c.getContext("2d"), ic = document.createElement("canvas"), ictx = ic.getContext("2d");
+const view = { W: innerWidth, H: innerHeight, dpr: Math.min(2, devicePixelRatio || 1) };
+view.scale = Math.min(view.W / 1920, view.H / 1080); view.ox = (view.W - 1920 * view.scale) / 2; view.oy = (view.H - 1080 * view.scale) / 2;
+for (const k of [c, ic]) { k.width = view.W * view.dpr; k.height = view.H * view.dpr; }
+c.style.width = view.W + "px"; c.style.height = view.H + "px";
+Ink.makeBackgrounds(view);
+const keys = q.get("only") ? q.get("only").split(",") : Objects.keys;
+function frame(ms) {
+  const t = T !== null ? +T : ms / 1000;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(Ink.bg()[ink], 0, 0);
+  const pen = new Ink.Pen(ink, Math.floor(t * 8), t);
+  keys.forEach((k, i) => {
+    const col = i % 4, row = Math.floor(i / 4);
+    const big = keys.length === 1; Ink.drawObject(pen, k, { cx: big ? 960 : 150 + 405 * (col + 0.5), cy: big ? 540 : 90 + 300 * (row + 0.5), s: big ? 380 : 125, t, phase: 0, seed: i * 100 });
+  });
+  const X = (k) => k.setTransform(view.dpr * view.scale, 0, 0, view.dpr * view.scale, view.dpr * view.ox, view.dpr * view.oy);
+  if (ink === "paper") {
+    ictx.setTransform(1, 0, 0, 1, 0, 0); ictx.clearRect(0, 0, ic.width, ic.height); X(ictx); pen.flush(ictx);
+    ictx.setTransform(1, 0, 0, 1, 0, 0); ictx.globalCompositeOperation = "destination-out"; ictx.drawImage(Ink.tooth(), 0, 0); ictx.globalCompositeOperation = "source-over";
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "multiply"; ctx.drawImage(ic, 0, 0); ctx.globalCompositeOperation = "source-over";
+  } else { X(ctx); pen.flush(ctx); }
+  if (T === null) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

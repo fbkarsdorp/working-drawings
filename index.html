@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Working Drawings</title>
+  <meta name="description" content="What eleven experiments with Claude say about the Meertens collections: a presentation for the Scientific Committee of the Meertens Instituut.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23EDE6D5'/%3E%3Cpath d='M6 26 L16 6 L26 26 Z' fill='none' stroke='%23C8223F' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/geist.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="stage"></div>
+
+  <div id="viewer" hidden>
+    <div class="vbar">
+      <button class="vback" title="Back to the deck">← <span>Deck</span></button>
+      <span class="vname"></span>
+      <button class="vlive">Go in live ↵</button>
+      <a class="vtab" target="_blank" rel="noopener" title="Open in a new tab">↗</a>
+    </div>
+  </div>
+
+  <div id="help" hidden>
+    <div class="card">
+      <div class="lbl">Keys</div>
+      <dl>
+        <dt>→ ␣ PgDn</dt><dd>next</dd>
+        <dt>← PgUp</dt><dd>previous</dd>
+        <dt>↵</dt><dd>lay the app out live on the page · ↵ again or F: full screen · Esc: back onto the sheet · ⇧↵ new tab</dd><dt></dt><dd>on “The day after”: ↵ lays out the walk, ↵ again goes in live</dd>
+        <dt>Esc · ← button</dt><dd>back from the app</dd>
+        <dt>I</dt><dd>appendix: all eleven apps (again: back)</dd>
+        <dt>1–9 · 0</dt><dd>app 1–9 in the appendix · cover</dd><dt>End</dt><dd>last sheet of the talk</dd>
+        <dt>L</dt><dd>English / Nederlands</dd>
+        <dt>F</dt><dd>full screen</dd>
+        <dt>H</dt><dd>this card</dd>
+      </dl>
+      <div class="lbl">Are the apps running?</div>
+      <ul id="statuslist"></ul>
+    </div>
+  </div>
+
+  <script src="js/opentype.min.js"></script>
+  <script src="js/font-geist-black.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/mesh.js"></script>
+  <script src="js/objects.js"></script>
+  <script src="js/ink.js"></script>
+  <script src="js/type.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
