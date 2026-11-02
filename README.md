@@ -35,8 +35,9 @@ Open `index.html` in Chrome (double-click works, no server or network needed), o
    the data had been collected by hand around 2019. People will scrape anyway, so
    better to hand the data over ourselves. The ring shows where each app got its data
    (solid line: dump, export or download; dashed: scraped or parsed).
-10. **For the plan**: three proposals: databanks as foundations, FAIR data (starting with
-    the catalogue), and an API rather than only rate limits.
+10. **What this asks of us**: the weight shifts from building interfaces to looking after the
+    data; three proposals: databanks as foundations, FAIR data (starting with the catalogue),
+    and an API rather than only rate limits.
 11. **Thank you**: two questions for discussion: judging digital work, and extraction
     versus FAIR data.
 

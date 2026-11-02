@@ -416,14 +416,15 @@
   // 10 · for the plan
   function planSlide() {
     const c = D.plan;
-    const tb = titleBlock(tr(c.big), 154, 1180, 200);
+    const tb = titleBlock(tr(c.big), 154, 1340, 200);
     const el = h("section", "layer ink-paper plan");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
-    const items = tr(c.items), top = 410, gy = (B - top) / items.length;
+    el.append(h("div", "sheet-text a2", esc(tr(c.text)), { left: px(L), top: px(tb.bottom + 30), width: px(1500) }));
+    const items = tr(c.items), top = Math.max(430, tb.bottom + 120), gy = (B - top) / items.length;
     items.forEach((q, i) => el.append(h("div", "question a" + Math.min(5, i + 2), `<span class="lbl">${ROMAN[i]}</span><span>${esc(q)}</span>`, { left: px(L), top: px(top + i * gy), width: px(R - L), height: px(gy) })));
     return {
       kind: "plan", el, dur: 2.4,
-      objs: [place("emblem", 1580, 250, 120, { delay: 0.2 })],
+      objs: [place("emblem", 1640, 250, 110, { delay: 0.2 })],
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 801);
         ticks(pen, f, this.sheet);

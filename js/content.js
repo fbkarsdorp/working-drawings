@@ -174,9 +174,10 @@ window.DECK = {
   },
 
   plan: {
-    label: { en: "For the Data & Collections plan", nl: "Voor het Data- & Collectieplan" },
-    big: { en: ["FOR THE PLAN"], nl: ["VOOR HET PLAN"] },
+    label: { en: "The coming years", nl: "De komende jaren" },
+    big: { en: ["WHAT THIS ASKS OF US"], nl: ["WAT DIT VAN ONS VRAAGT"] },
     right: { en: "Proposals", nl: "Voorstellen" },
+    text: { en: "The weight shifts from building interfaces to looking after the data.", nl: "Het zwaartepunt verschuift van interfaces bouwen naar zorgen voor de data." },
     items: {
       en: [
         "Treat every databank as a foundation, not an end product: the interfaces will come from everyone.",
