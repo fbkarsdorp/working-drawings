@@ -192,6 +192,26 @@ window.DECK = {
     },
   },
 
+  // the deck itself, as a twelfth drawing. Hours and prompts from this project's own session
+  // logs, counted like the others (pauses over 15 minutes left out). Quotes: Folgert's prompts.
+  meta: {
+    label: { en: "One more drawing", nl: "Nog één tekening" },
+    right: { en: "Made the same way", nl: "Op dezelfde manier gemaakt" },
+    big: { en: ["THIS DECK"], nl: ["DEZE PRESENTATIE"] },
+    text: {
+      en: "Claude drew every sheet, wrote the code and recorded the demos. What to say, and what not to say, came from me.",
+      nl: "Claude tekende elk blad, schreef de code en nam de demo's op. Wat er gezegd moest worden, en wat niet, kwam van mij.",
+    },
+    steer: { en: "Where I steered", nl: "Waar ik bijstuurde" },
+    quotes: [
+      "The others feel a bit off for the Meertens.",
+      "Everyone has now become an interface builder and that's amazing and exciting.",
+      "The “solving problems become automated” part will be scary for some people.",
+    ],
+    shot: "shots/deck.jpg",
+    facts: [[4.6, { en: "hours of conversation", nl: "uur gesprek" }], [40, { en: "prompts", nl: "prompts" }], [2, { en: "languages", nl: "talen" }]],
+  },
+
   end: {
     big: { en: ["THANK YOU"], nl: ["DANK U WEL"] },
     label: { en: "For discussion", nl: "Ter bespreking" },

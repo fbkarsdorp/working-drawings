@@ -7,7 +7,7 @@ drafting table.
 Open `index.html` in Chrome (double-click works, no server or network needed), or run
 `./serve.sh` and go to <http://localhost:5050/>. Press `F` for full screen.
 
-## The story (eleven sheets)
+## The story (twelve sheets)
 
 1. **Cover**: the eleven drawings in a row.
 2. **Two conversations**: the team leaders on AI for research, and the Data & Collections
@@ -38,7 +38,10 @@ Open `index.html` in Chrome (double-click works, no server or network needed), o
 10. **What this asks of us**: the weight shifts from building interfaces to looking after the
     data; three proposals: databanks as foundations, FAIR data (starting with the catalogue),
     and an API rather than only rate limits.
-11. **Thank you**: two questions for discussion: judging digital work, and extraction
+11. **This deck**: the presentation itself as a twelfth drawing: hours and prompts from
+    this project's own logs (counted like the others), three of Folgert's steering prompts,
+    and the cover taped on as a print (`shots/deck.jpg`). Recount before the meeting.
+12. **Thank you**: two questions for discussion: judging digital work, and extraction
     versus FAIR data.
 
 After that comes an **appendix** (`A`): all eleven apps, with one plate each. Each plate

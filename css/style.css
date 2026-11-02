@@ -258,3 +258,14 @@ body.idle #viewer .vbar { opacity: .25; }
 .legend b { color: var(--red); margin-right: 8px; }
 body.idle .legend:not(.keep), .legend.off { opacity: 0; }
 body.idle .legend:not(.keep) button, .legend.off button { pointer-events: none; }
+
+/* the meta sheet: the deck's own cover, taped on as a print */
+.steer { margin-top: 34px; display: flex; flex-direction: column; gap: 12px; }
+.steer .lbl { margin-bottom: 2px; }
+.steer q { font-weight: 600; font-size: 25px; line-height: 1.34; quotes: "\201C" "\201D"; }
+.snap { box-sizing: border-box; padding: 14px; background: #f7f3e8; transform: rotate(1.6deg);
+  box-shadow: 0 1px 1px rgba(40, 30, 20, .10), 0 8px 18px -8px rgba(40, 30, 20, .3); }
+.snap img { display: block; width: 100%; height: auto; }
+.snap::before, .snap::after { content: ""; position: absolute; top: -14px; width: 110px; height: 30px; background: rgba(226, 214, 176, .72); }
+.snap::before { left: -26px; transform: rotate(-22deg); }
+.snap::after { right: -26px; transform: rotate(24deg); }
