@@ -22,6 +22,14 @@ window.DECK = {
     url: "https://karsdorp.io/working-drawings/",
     show: "karsdorp.io/working-drawings",
     label: { en: "Take the drawings home", nl: "Neem de tekeningen mee" },
+    hint: { en: "Best on a laptop", nl: "Het mooist op een laptop" },
+    // shown instead of the deck on a phone-sized screen
+    phone: {
+      title: { en: "Made for a bigger screen", nl: "Gemaakt voor een groter scherm" },
+      text: { en: "These drawings are meant for a laptop. Send the link to yourself and open it there.", nl: "Deze tekeningen zijn bedoeld voor een laptop. Stuur de link naar jezelf en open hem daar." },
+      send: { en: "Send me the link", nl: "Stuur mij de link" },
+      anyway: { en: "Show it here anyway", nl: "Toch hier bekijken" },
+    },
     qr: [
       "111111101011000011111001001111111",
       "100000100110110111001010101000001",

@@ -188,7 +188,7 @@
   }
   function takeaway(x, y, w, rot, cls) {
     const c = D.share, card = h("div", "takeaway " + cls, undefined, { left: px(x), top: px(y), width: px(w), transform: `rotate(${rot}deg)` });
-    card.append(h("span", "lbl", esc(tr(c.label))), qrCanvas(c.qr, w - 64, Math.round(x + y)), h("span", "url", esc(c.show)));
+    card.append(h("span", "lbl", esc(tr(c.label))), qrCanvas(c.qr, w - 84, Math.round(x + y)), h("span", "url", `${esc(c.show)}<small>${esc(tr(c.hint))}</small>`));
     return card;
   }
 
@@ -969,6 +969,24 @@
   let rz;
   addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { resize(); placeBox(); }, 120); });
 
+  // ---------- on a phone: point people to their laptop ----------
+  function phoneNote() {
+    if (Math.min(innerWidth, innerHeight) >= 560 && innerWidth >= 760) return;
+    try { if (sessionStorage.getItem("wd-anyway")) return; } catch (e) { /* */ }
+    let pl = lang;
+    try { if (!localStorage.getItem("redrawn-lang")) pl = /^nl/i.test(navigator.language || "") ? "nl" : "en"; } catch (e) { /* */ }
+    const S = D.share, P = S.phone, t = (o) => o[pl];
+    const box = document.getElementById("small");
+    box.innerHTML = `<div class="note"><span class="lbl">Working Drawings</span><h1>${esc(t(P.title))}</h1><p>${esc(t(P.text))}</p>`
+      + `<button class="send">${esc(t(P.send))}</button><b class="url">${esc(S.show)}</b></div><button class="anyway">${esc(t(P.anyway))}</button>`;
+    box.querySelector(".send").onclick = () => {
+      if (navigator.share) navigator.share({ title: "Working Drawings", url: S.url }).catch(() => {});
+      else location.href = `mailto:?subject=${encodeURIComponent("Working Drawings")}&body=${encodeURIComponent(S.url)}`;
+    };
+    box.querySelector(".anyway").onclick = () => { box.hidden = true; try { sessionStorage.setItem("wd-anyway", "1"); } catch (e) { /* */ } };
+    box.hidden = false;
+  }
+
   // ---------- start ----------
   Type.init();
   resize();
@@ -976,5 +994,6 @@
   cur = clamp(parseInt((location.hash || "#0").slice(1), 10) || 0, 0, slides.length - 1);
   requestAnimationFrame((ms) => { now = ms / 1000; go(cur, true); requestAnimationFrame(frameLoop); });
   checkAll();
+  phoneNote();
   window.__deck = { ms: () => frameLoop.ms, go, slides: () => slides, view, cur: () => cur, hover: (v) => { slides[cur].hovering = v; } };
 })();

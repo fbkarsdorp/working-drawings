@@ -224,4 +224,22 @@ body.idle #viewer .vbar { opacity: .25; }
 .takeaway::after { right: -22px; transform: rotate(21deg); }
 .takeaway .lbl { position: static; color: var(--acc); font-size: 16px; letter-spacing: .16em; white-space: nowrap; }
 .takeaway canvas { position: static; display: block; }
-.takeaway .url { position: static; font-weight: 700; font-size: 19px; letter-spacing: -.005em; white-space: nowrap; }
+.takeaway .url { position: static; font-weight: 700; font-size: 19px; letter-spacing: -.005em; white-space: nowrap; text-align: center; }
+.takeaway .url small { display: block; margin-top: 4px; font-weight: 500; font-size: 15px; opacity: .65; letter-spacing: 0; }
+
+/* phone-sized screens: a note instead of the deck */
+#small { position: fixed; inset: 0; z-index: 50; overflow: auto; background: var(--paper); color: var(--graphite); font-family: "Geist", system-ui, sans-serif;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 40px 16px;
+  background-image: linear-gradient(rgba(200, 34, 63, .10) 1px, transparent 1px), linear-gradient(90deg, rgba(200, 34, 63, .10) 1px, transparent 1px); background-size: 24px 24px; }
+#small[hidden] { display: none; }
+#small .note { position: relative; max-width: 340px; padding: 30px 26px 26px; background: #f7f3e8; transform: rotate(-1.5deg);
+  box-shadow: 0 1px 1px rgba(40, 30, 20, .10), 0 8px 18px -8px rgba(40, 30, 20, .3); display: flex; flex-direction: column; gap: 14px; }
+#small .note::before, #small .note::after { content: ""; position: absolute; top: -12px; width: 80px; height: 26px; background: rgba(226, 214, 176, .75); }
+#small .note::before { left: -18px; transform: rotate(-24deg); }
+#small .note::after { right: -18px; transform: rotate(21deg); }
+#small .lbl { position: static; color: var(--red); font-size: 13px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; }
+#small h1 { margin: 0; font-size: 28px; line-height: 1.1; font-weight: 900; letter-spacing: -.015em; }
+#small p { margin: 0; font-size: 17px; line-height: 1.45; }
+#small .send { margin-top: 6px; padding: 13px 16px; border: 0; background: var(--graphite); color: #f7f3e8; font: 700 16px/1 "Geist", system-ui, sans-serif; letter-spacing: .02em; cursor: pointer; }
+#small .url { font-size: 15px; text-align: center; opacity: .75; }
+#small .anyway { border: 0; background: none; color: var(--graphite); opacity: .6; font: 500 15px/1 "Geist", system-ui, sans-serif; text-decoration: underline; cursor: pointer; padding: 8px; }

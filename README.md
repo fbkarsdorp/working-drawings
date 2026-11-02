@@ -51,6 +51,10 @@ follows within a minute or two. The cover and the last sheet carry a taped card 
 QR code for that address. If the address ever changes, update `share` in `js/content.js`,
 including the QR rows (`segno.make(url, error="q")`).
 
+The deck is made for a laptop. On a phone-sized screen it first shows a note with a
+*Send me the link* button (the share sheet, so AirDrop or messages work; email where sharing
+isn't available) and a *Show it here anyway* link.
+
 Opened from a public address, the deck does not probe `localhost` (that would trigger the
 browser's local-network prompt), so the three local apps play their demos. Opened from this
 laptop, or with `?live` added to the URL, it checks and opens running apps live.
