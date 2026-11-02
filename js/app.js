@@ -952,7 +952,7 @@
   let beforeIndex = null;
   addEventListener("keydown", (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    const k = e.key;
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; // so Shift+A works like A (also L, H, F, I)
     if (openA) {
       if (k === "Escape") closeApp();
       else if (mode === "clip" && k === "Enter") goLive();
