@@ -70,7 +70,7 @@ live as before.
 ## Keys
 
 A small legend at the bottom right of every sheet shows the main keys and can be clicked
-(← → · L · I · H). For visitors it stays in view until they turn the first sheet; when
+(← → · L · A · H). For visitors it stays in view until they turn the first sheet; when
 presenting from this laptop it fades after a few seconds and only returns when the mouse
 moves. H opens a key card in the current language.
 
@@ -79,7 +79,7 @@ moves. H opens a key card in the current language.
 | → ␣ PgDn / ← PgUp | next / previous (clickers work) |
 | ↵ | lay the app out live on the page, in a large pencil frame · ↵ again (or F) for full screen · ⇧↵ opens it in a new tab |
 | *Back to the page* (under the frame) | put the app away. Once you click into an app, it has the keyboard, so use the buttons; in full screen, use *Back onto the page* at the top |
-| I | appendix: all eleven; press again to go back |
+| A | appendix: all eleven; press again to go back |
 | 1–9 · 0 | app 1–9 in the appendix · cover |
 | L | English / Nederlands |
 | H | key card, plus a live check of which apps are running |

@@ -409,7 +409,7 @@ window.DECK = {
       ["←", { en: "previous sheet", nl: "vorig blad" }],
       ["↵", { en: "on a sheet with an app: lay it out on the page · ↵ again: full screen", nl: "op een blad met een toepassing: leg hem op het blad · nog eens ↵: volledig scherm" }],
       ["Esc", { en: "put the app back · once you click inside an app, use “Back to the page” below it", nl: "leg de toepassing terug · klik je in een toepassing, gebruik dan “Terug naar het blad” eronder" }],
-      ["I", { en: "all eleven apps, one sheet each (again: back)", nl: "alle elf toepassingen, elk op een eigen blad (nog eens: terug)" }],
+      ["A", { en: "all eleven apps, one sheet each (again: back)", nl: "alle elf toepassingen, elk op een eigen blad (nog eens: terug)" }],
       ["1–9 · 0", { en: "app 1–9 · the cover", nl: "toepassing 1–9 · het voorblad" }],
       ["L", { en: "Nederlands", nl: "English" }],
       ["F", { en: "full screen", nl: "volledig scherm" }],

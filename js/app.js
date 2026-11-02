@@ -939,7 +939,7 @@
   function paintKeys() {
     const K = D.keys, G = K.legend;
     legend.innerHTML = `<button data-k="ArrowLeft" class="arr" aria-label="previous">←</button><button data-k="ArrowRight" class="arr" aria-label="next">→</button><span>${esc(tr(G.sheets))}</span>`
-      + `<button data-k="l"><b>L</b>${esc(tr(G.lang))}</button><button data-k="i"><b>I</b>${esc(tr(G.all))}</button><button data-k="h"><b>H</b>${esc(tr(G.help))}</button>`;
+      + `<button data-k="l"><b>L</b>${esc(tr(G.lang))}</button><button data-k="a"><b>A</b>${esc(tr(G.all))}</button><button data-k="h"><b>H</b>${esc(tr(G.help))}</button>`;
     help.querySelector(".card").innerHTML = `<div class="lbl">${esc(tr(K.title))}</div><dl>${K.rows.map(([k, d]) => `<dt>${esc(k)}</dt><dd>${esc(tr(d))}</dd>`).join("")}</dl>`
       + (probeLocal ? `<div class="lbl">${esc(tr(K.status))}</div><ul id="statuslist"></ul>` : `<p class="note">${esc(tr(K.note))}</p>`)
       + `<button class="close">${esc(tr(K.close))}</button>`;
