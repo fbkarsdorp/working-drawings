@@ -69,6 +69,11 @@ live as before.
 
 ## Keys
 
+A small legend at the bottom right of every sheet shows the main keys and can be clicked
+(← → · L · I · H). For visitors it stays in view until they turn the first sheet; when
+presenting from this laptop it fades after a few seconds and only returns when the mouse
+moves. H opens a key card in the current language.
+
 | | |
 |---|---|
 | → ␣ PgDn / ← PgUp | next / previous (clickers work) |

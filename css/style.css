@@ -125,7 +125,9 @@ body.idle #viewer .vbar { opacity: .25; }
 /* ---------- help ---------- */
 #help { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(7,8,10,.55); }
 #help[hidden] { display: none; }
-#help .card { --acc: var(--red); background: var(--paper); color: var(--graphite); padding: 40px 48px; width: min(760px, 92vw); max-height: 90vh; overflow: auto; border: 2px solid var(--graphite); }
+#help .card { --acc: var(--red); background: var(--paper); color: var(--graphite); padding: 40px 48px 32px; width: min(760px, 92vw); max-height: 90vh; overflow: auto; border: 2px solid var(--graphite); font-family: "Geist", system-ui, sans-serif; }
+#help .note { margin: -8px 0 24px; font-size: 16px; line-height: 1.45; opacity: .75; }
+#help .close { display: block; margin: 8px 0 0 auto; padding: 10px 18px; border: 0; background: var(--graphite); color: var(--paper); font: 700 14px/1 "Geist", system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
 #help .lbl { font-size: 16px; margin: 0 0 16px; }
 #help dl { display: grid; grid-template-columns: 170px 1fr; gap: 8px 20px; margin: 0 0 30px; font-size: 17px; }
 #help dt { font-weight: 800; }
@@ -244,3 +246,14 @@ body.idle #viewer .vbar { opacity: .25; }
 #small .send { margin-top: 6px; padding: 13px 16px; border: 0; background: var(--graphite); color: #f7f3e8; font: 700 16px/1 "Geist", system-ui, sans-serif; letter-spacing: .02em; cursor: pointer; }
 #small .url { font-size: 15px; text-align: center; opacity: .75; }
 #small .anyway { border: 0; background: none; color: var(--graphite); opacity: .6; font: 500 15px/1 "Geist", system-ui, sans-serif; text-decoration: underline; cursor: pointer; padding: 8px; }
+
+/* key legend, bottom right of every sheet */
+.legend { position: absolute; right: 150px; top: 1014px; display: flex; align-items: center; gap: 26px; color: var(--graphite); opacity: .6;
+  font: 700 15px/1 "Geist", system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; transition: opacity .4s ease; }
+.legend button { pointer-events: auto; background: none; border: 0; padding: 6px 2px; margin: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.legend button:hover { color: var(--red); opacity: 1; }
+.legend .arr { font-size: 22px; letter-spacing: 0; padding: 2px 4px; margin-right: -18px; }
+.legend span { margin-left: 4px; }
+.legend b { color: var(--red); margin-right: 8px; }
+body.idle .legend:not(.keep), .legend.off { opacity: 0; }
+body.idle .legend:not(.keep) button, .legend.off button { pointer-events: none; }

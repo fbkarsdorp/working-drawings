@@ -506,6 +506,7 @@
     slides = [...main, ...appendix];
     slides.forEach((s, i) => { s.i = i; s.enterT = -1e9; s.full = new Set(); stage.append(s.el); });
     document.documentElement.lang = lang;
+    paintKeys();
     paintStatus();
   }
 
@@ -764,6 +765,7 @@
   function frameLoop(ms) {
     requestAnimationFrame(frameLoop);
     now = ms / 1000;
+    legend.classList.toggle("off", !!(box || openA));
     if (paused) return;
     // with a live app on the page, redraw only when the pencil moves (8 times a second)
     const tick = Math.floor(now * 8);
@@ -809,6 +811,7 @@
     const keysA = new Set(A.objs.map((p) => p.key));
     for (const p of S.objs) if (conveyor || keysA.has(p.key)) S.full.add(p.key);
     trans = { from, t0: now, dir, conveyor };
+    legend.classList.remove("keep");
     S.enterT = now + 0.3;
     A.el.classList.add("out"); A.el.classList.remove("on");
     setTimeout(() => { if (slides[cur] === S) S.el.classList.add("on"); }, 260);
@@ -925,6 +928,22 @@
 
   // ---------- keys ----------
   const help = document.getElementById("help");
+  // the key legend (bottom right, clickable) and the key card, in the current language.
+  // Visitors keep the legend in view until they turn the first sheet; when presenting it
+  // shows only while the mouse moves.
+  const legend = document.createElement("div");
+  legend.className = "legend" + (probeLocal ? "" : " keep");
+  stage.append(legend);
+  legend.onclick = (e) => { const b = e.target.closest("button"); if (b) dispatchEvent(new KeyboardEvent("keydown", { key: b.dataset.k })); };
+  help.onclick = (e) => { if (e.target === help || e.target.closest(".close")) toggleHelp(false); };
+  function paintKeys() {
+    const K = D.keys, G = K.legend;
+    legend.innerHTML = `<button data-k="ArrowLeft" class="arr" aria-label="previous">←</button><button data-k="ArrowRight" class="arr" aria-label="next">→</button><span>${esc(tr(G.sheets))}</span>`
+      + `<button data-k="l"><b>L</b>${esc(tr(G.lang))}</button><button data-k="i"><b>I</b>${esc(tr(G.all))}</button><button data-k="h"><b>H</b>${esc(tr(G.help))}</button>`;
+    help.querySelector(".card").innerHTML = `<div class="lbl">${esc(tr(K.title))}</div><dl>${K.rows.map(([k, d]) => `<dt>${esc(k)}</dt><dd>${esc(tr(d))}</dd>`).join("")}</dl>`
+      + (probeLocal ? `<div class="lbl">${esc(tr(K.status))}</div><ul id="statuslist"></ul>` : `<p class="note">${esc(tr(K.note))}</p>`)
+      + `<button class="close">${esc(tr(K.close))}</button>`;
+  }
   function toggleHelp(force) {
     const on = force !== undefined ? force : help.hidden;
     help.hidden = !on;
@@ -1002,5 +1021,7 @@
   requestAnimationFrame((ms) => { now = ms / 1000; go(cur, true); requestAnimationFrame(frameLoop); });
   checkAll();
   phoneNote();
+  // presenting: let the legend fade after a few seconds unless the mouse moves
+  if (probeLocal) idle = setTimeout(() => document.body.classList.add("idle"), 4000);
   window.__deck = { ms: () => frameLoop.ms, go, slides: () => slides, view, cur: () => cur, hover: (v) => { slides[cur].hovering = v; } };
 })();

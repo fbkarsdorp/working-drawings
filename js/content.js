@@ -395,6 +395,31 @@ window.DECK = {
     },
   ],
 
+  // the key legend (bottom right) and the key card (H)
+  keys: {
+    legend: {
+      sheets: { en: "sheets", nl: "bladen" },
+      lang: { en: "Nederlands", nl: "English" },
+      all: { en: "all eleven", nl: "alle elf" },
+      help: { en: "keys", nl: "toetsen" },
+    },
+    title: { en: "Finding your way", nl: "De weg vinden" },
+    rows: [
+      ["→ · ␣", { en: "next sheet", nl: "volgend blad" }],
+      ["←", { en: "previous sheet", nl: "vorig blad" }],
+      ["↵", { en: "on a sheet with an app: lay it out on the page · ↵ again: full screen", nl: "op een blad met een toepassing: leg hem op het blad · nog eens ↵: volledig scherm" }],
+      ["Esc", { en: "put the app back · once you click inside an app, use “Back to the page” below it", nl: "leg de toepassing terug · klik je in een toepassing, gebruik dan “Terug naar het blad” eronder" }],
+      ["I", { en: "all eleven apps, one sheet each (again: back)", nl: "alle elf toepassingen, elk op een eigen blad (nog eens: terug)" }],
+      ["1–9 · 0", { en: "app 1–9 · the cover", nl: "toepassing 1–9 · het voorblad" }],
+      ["L", { en: "Nederlands", nl: "English" }],
+      ["F", { en: "full screen", nl: "volledig scherm" }],
+      ["H", { en: "this card", nl: "deze kaart" }],
+    ],
+    note: { en: "Three apps run on the presenter's laptop; here they play a short recording.", nl: "Drie toepassingen draaien op de laptop van de spreker; hier spelen ze een korte opname." },
+    status: { en: "Are the apps running?", nl: "Draaien de toepassingen?" },
+    close: { en: "Close", nl: "Sluiten" },
+  },
+
   ui: {
     open: { en: "↵ Open", nl: "↵ Openen" },
     watch: { en: "↵ Watch the walk", nl: "↵ Bekijk de wandeling" },
