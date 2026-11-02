@@ -39,8 +39,7 @@ Open `index.html` in Chrome (double-click works, no server or network needed), o
     data; three proposals: databanks as foundations, FAIR data (starting with the catalogue),
     and an API rather than only rate limits.
 11. **This deck**: the presentation itself as a twelfth drawing: hours and prompts from
-    this project's own logs (counted like the others), three of Folgert's steering prompts,
-    and the cover taped on as a print (`shots/deck.jpg`). Recount before the meeting.
+    this project's own logs (counted like the others), and the cover taped on as a print (`shots/deck.jpg`). Recount before the meeting.
 12. **Thank you**: two questions for discussion: judging digital work, and extraction
     versus FAIR data.
 

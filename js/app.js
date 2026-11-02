@@ -440,8 +440,7 @@
     const el = h("section", "layer ink-paper metasheet");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
     const col = h("div", "col", undefined, { left: px(L), top: px(tb.bottom + 36), width: px(780) });
-    col.append(h("div", "tagline a2", esc(tr(c.text))),
-      h("div", "steer a3", `<span class="lbl">${esc(tr(c.steer))}</span>${c.quotes.map((q) => `<q>${esc(q)}</q>`).join("")}`));
+    col.append(h("div", "tagline a2", esc(tr(c.text))));
     el.append(col);
     const facts = h("div", "facts a4", undefined, { left: px(L), top: px(832), width: px(900) });
     for (const [num, lab] of c.facts) facts.append(h("div", "fact", `<b>${esc(String(fmt(num)))}</b><span>${esc(tr(lab))}</span>`));
