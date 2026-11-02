@@ -40,7 +40,7 @@ Open `index.html` in Chrome (double-click works, no server or network needed), o
 11. **Thank you**: two questions for discussion: judging digital work, and extraction
     versus FAIR data.
 
-After that comes an **appendix** (`I`): all eleven apps, with one plate each. Each plate
+After that comes an **appendix** (`A`): all eleven apps, with one plate each. Each plate
 shows the data route and the build time.
 
 ## Sharing the deck
