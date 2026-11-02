@@ -716,6 +716,14 @@
       ctx.filter = u < 0.999 ? `grayscale(${1 - u}) brightness(${1 + 0.55 * (1 - u)})` : "none";
       ctx.drawImage(src, 0, 0, sw, sh, r.x, r.y, r.w, r.h);
       ctx.filter = "none";
+      // a recorded app (light screens) settles into a plain, opaque picture, so the sheet
+      // underneath does not show through and pale details stay readable
+      if (box.local && u > 0.6) {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.globalAlpha = ease(clamp((u - 0.6) / 0.4));
+        ctx.drawImage(src, 0, 0, sw, sh, r.x, r.y, r.w, r.h);
+        ctx.globalAlpha = 1;
+      }
     }
     ctx.restore();
     const pen = new Ink.Pen("paper", Math.floor(now * 8), now);
