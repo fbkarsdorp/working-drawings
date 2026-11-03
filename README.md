@@ -74,15 +74,8 @@ live as before.
 
 ## Presenting
 
-Run `./serve.sh`, open the deck, put it full screen on the projector (`F`) and press `P`:
-a notes window opens for the laptop screen. It shows the cues for the current sheet from
-`notes.md`, the next sheet, a timer (it starts when you leave the cover; `T` restarts it,
-red after the planned total) and the clock. Arrow keys, Enter and Esc in either window move
-both. `+`/`−` change the text size.
-
-`notes.md` is yours to edit: one `## <sheet> · <name> · <seconds> s` section per sheet,
-`- ` cues, `> ` lines to say exactly, `[actions]`. The notes window rereads it at every sheet
-change. It is in `.gitignore`, so it stays on this laptop and never goes online.
+Speaker cues are in `notes.md` (one section per sheet). It is in `.gitignore`, so it stays on
+this laptop and never goes online; print it or open it on a phone next to you.
 
 ## Keys
 
