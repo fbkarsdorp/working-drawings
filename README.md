@@ -71,6 +71,18 @@ PLAND page on to a Sage about the korenpater). When one of them does not answer,
 demo with the note "the app runs on the presenter's laptop"; when it is running, it opens
 live as before.
 
+## Presenting
+
+Run `./serve.sh`, open the deck, put it full screen on the projector (`F`) and press `P`:
+a notes window opens for the laptop screen. It shows the cues for the current sheet from
+`notes.md`, the next sheet, a timer (it starts when you leave the cover; `T` restarts it,
+red after the planned total) and the clock. Arrow keys, Enter and Esc in either window move
+both. `+`/`−` change the text size.
+
+`notes.md` is yours to edit: one `## <sheet> · <name> · <seconds> s` section per sheet,
+`- ` cues, `> ` lines to say exactly, `[actions]`. The notes window rereads it at every sheet
+change. It is in `.gitignore`, so it stays on this laptop and never goes online.
+
 ## Keys
 
 A small legend at the bottom right of every sheet shows the main keys and can be clicked

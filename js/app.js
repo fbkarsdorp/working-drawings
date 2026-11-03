@@ -798,10 +798,37 @@
   }
 
   const TDUR = 0.95;
+  // ---------- presenter view (P): a second window with notes.md, kept in step over a channel ----------
+  const BYKIND = { cover: "cover", origin: "origin", contact: "explorations", hours: "hours", scarce: "scarce", data: "data", plan: "plan", meta: "meta", end: "end", index: "index" };
+  function titleOf(s) {
+    if (!s) return "";
+    if (s.kind === "plate") return s.main && s.app && s.app.id === D.cabinet.app ? tr(D.cabinet.big).join(" ") : s.app.name;
+    const c = D[BYKIND[s.kind]];
+    return c ? tr(c.big).join(" ") : s.kind;
+  }
+  const chan = "BroadcastChannel" in window ? new BroadcastChannel("working-drawings") : null;
+  let sentSig = "";
+  function postState(force) {
+    if (!chan) return;
+    const sig = [cur, lang, box ? box.kind : "", openA ? 1 : 0].join("|");
+    if (sig === sentSig && !force) return;
+    sentSig = sig;
+    chan.postMessage({ state: {
+      cur, lang, main: MAIN, n: cur < MAIN ? cur + 1 : null,
+      title: titleOf(slides[cur]), next: cur + 1 < MAIN ? titleOf(slides[cur + 1]) : "",
+      app: box ? (box.local ? "recording" : box.kind) : openA ? "full" : "",
+    } });
+  }
+  if (chan) chan.onmessage = ({ data }) => {
+    if (data.hello) postState(true);
+    if (data.key) dispatchEvent(new KeyboardEvent("keydown", { key: data.key, shiftKey: !!data.shift }));
+  };
+
   function frameLoop(ms) {
     requestAnimationFrame(frameLoop);
     now = ms / 1000;
     legend.classList.toggle("off", !!(box || openA));
+    postState();
     if (paused) return;
     // with a live app on the page, redraw only when the pencil moves (8 times a second)
     const tick = Math.floor(now * 8);
@@ -1006,7 +1033,7 @@
       return;
     }
     if (["ArrowRight", "PageDown", " ", "n", "ArrowDown"].includes(k)) { e.preventDefault(); go(cur + 1); }
-    else if (["ArrowLeft", "PageUp", "p", "Backspace", "ArrowUp"].includes(k)) { e.preventDefault(); go(cur - 1); }
+    else if (["ArrowLeft", "PageUp", "Backspace", "ArrowUp"].includes(k)) { e.preventDefault(); go(cur - 1); }
     else if (k === "Home") go(0);
     else if (k === "End") go(MAIN - 1);
     else if (k === "Enter") { const S = slides[cur]; if (S.app) { if (e.shiftKey) window.open(S.app.url, "_blank"); else present(S.app, PR, S); } else go(cur + 1); }
@@ -1019,6 +1046,7 @@
     else if (k === "l") { lang = lang === "en" ? "nl" : "en"; try { localStorage.setItem("redrawn-lang", lang); } catch (_) { /* */ } const c = cur; build(); go(c, "drawn"); }
     else if (k === "f") { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
     else if (k === "h" || k === "?") toggleHelp();
+    else if (k === "p" && probeLocal) window.open("presenter.html", "wd-presenter", "width=1100,height=780");
     else if (/^[0-9]$/.test(k)) {
       const n = +k;
       if (n === 0) go(0);
