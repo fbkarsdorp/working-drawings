@@ -5,7 +5,8 @@ experiments with Claude say about the Meertens collections. Drawn in pencil on a
 drafting table.
 
 Open `index.html` in Chrome (double-click works, no server or network needed), or run
-`./serve.sh` and go to <http://localhost:5050/>. Press `F` for full screen.
+`./serve.sh` (port 5050) or `./serve.sh 6060` (a port of your choice). If the port is taken,
+it moves on to the next free one and opens the deck there. Press `F` for full screen.
 
 ## The story (twelve sheets)
 
