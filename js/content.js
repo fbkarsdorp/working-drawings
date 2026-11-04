@@ -2,7 +2,7 @@
  *
  * The story: two conversations at the Meertens (AI for research; opening the collections
  * to a general audience) met in a metaphor, the cabinet of curiosities. The day after,
- * Claude built it. Experiments followed, then two serious attempts. They show two things:
+ * Claude built it. Ten experiments followed. They show two things:
  * building is no longer the bottleneck, and open, documented data is the real interface.
  *
  * Hours and prompts come from the Claude Code session logs (pauses over 15 minutes not
@@ -94,11 +94,7 @@ window.DECK = {
     label: { en: "Explorations", nl: "Verkenningen" },
     right: { en: "Click one to open it", nl: "Klik om te openen" },
     big: { en: ["EXPERIMENTS"], nl: ["VERKENNINGEN"] },
-    text: { en: "Eight sketches of what a collection can become once you have its data.", nl: "Acht schetsen van wat een collectie kan worden als je de data hebt." },
-  },
-
-  attempts: {
-    label: { en: "Attempt", nl: "Poging" },
+    text: { en: "Ten sketches of what a collection can become once you have its data.", nl: "Tien schetsen van wat een collectie kan worden als je de data hebt." },
   },
 
   hours: {
@@ -230,7 +226,7 @@ window.DECK = {
     right: { en: "Click one to open it", nl: "Klik om te openen" },
   },
 
-  // role: spark | exploration | attempt. route: how the data was obtained (solid = dump/export/download).
+  // role: spark | exploration. route: how the data was obtained (solid = dump/export/download).
   apps: [
     {
       id: "museum", short: "Museum", role: "spark", light: false, obj: "vitrine",
@@ -282,7 +278,7 @@ window.DECK = {
       shot: "shots/pland.jpg", hours: 2.2, prompts: 16, solid: true,
       route: { en: "CSV export", nl: "CSV-export" },
       kind: { en: "New question", nl: "Nieuwe vraag" },
-      shows: { en: "How do people name a plant? The database itself doesn't say.", nl: "Hoe geven mensen een plant een naam? De databank zegt het niet." },
+      shows: { en: "How do people name a plant? Not in the database.", nl: "Hoe geven mensen een plant een naam? Niet in de databank." },
       tagline: { en: "One dandelion, 235 names.", nl: "Eén paardenbloem, 235 namen." },
       fig: { en: "The reasoning behind a dialect name.", nl: "De redenering achter een dialectnaam." },
       facts: [[323799, { en: "records", nl: "opgaven" }], [16956, { en: "different names", nl: "verschillende namen" }], [17, { en: "ways of naming", nl: "manieren van benoemen" }]],
@@ -360,52 +356,30 @@ window.DECK = {
       source: { en: "Nederlandse Volksverhalenbank (export)", nl: "Nederlandse Volksverhalenbank (export)" },
     },
     {
-      id: "atlas", short: "Atlas", role: "attempt", light: true, obj: "atlas",
+      id: "atlas", short: "Atlas", role: "exploration", light: true, obj: "atlas",
       name: "Atlas van het Alledaagse",
       big: { en: ["ATLAS VAN HET", "ALLEDAAGSE"], nl: ["ATLAS VAN HET", "ALLEDAAGSE"] },
       url: "https://www.karsdorp.io/atlas-alledaagse/", where: "karsdorp.io/atlas-alledaagse",
       shot: "shots/atlas.jpg", hours: 3.0, prompts: 10, solid: false,
       route: { en: "scraped catalogue", nl: "gescrapete catalogus" },
+      kind: { en: "Overview", nl: "Overzicht" },
+      shows: { en: "All 662 archive collections on one page, by subject.", nl: "Alle 662 archiefcollecties op één pagina, naar onderwerp." },
       tagline: { en: "The 662 collections of the archive as one atlas: what it holds and how it hangs together.", nl: "De 662 collecties van het archief als één atlas: wat erin zit en hoe het samenhangt." },
-      points: {
-        label: { en: "Compared with the cabinet", nl: "Vergeleken met het kabinet" },
-        en: [
-          "The cabinet shows one collection at a time, in 3D. The Atlas shows all 662 on one page, with a tour, and works on a phone.",
-          "It sets the departments aside: a language model read every description and grouped the collections by subject.",
-          "It finds 240 links nobody drew: collections in different departments that read alike but never refer to each other.",
-        ],
-        nl: [
-          "Het kabinet toont één collectie tegelijk, in 3D. De Atlas toont alle 662 op één pagina, met rondleiding, ook op een telefoon.",
-          "Hij laat de afdelingen los: een taalmodel las elke beschrijving en ordende de collecties naar onderwerp.",
-          "Hij vindt 240 verbanden die niemand legde: verwante collecties uit verschillende afdelingen, zonder onderlinge verwijzing.",
-        ],
-      },
       fig: { en: "The whole archive on one page.", nl: "Het hele archief op één pagina." },
       facts: [[662, { en: "collections", nl: "collecties" }], [7, { en: "departments", nl: "afdelingen" }], [3.0, { en: "hours of conversation", nl: "uur gesprek" }]],
       source: { en: "Meertens archive catalogue (scraped)", nl: "Archiefcatalogus Meertens (gescrapet)" },
     },
     {
-      id: "vraag", short: "Wat bewaart", role: "attempt", light: true, obj: "magnifier",
+      id: "vraag", short: "Wat bewaart", role: "exploration", light: true, obj: "magnifier",
       name: "Wat bewaart het Meertens?",
       big: { en: ["WAT BEWAART", "HET MEERTENS?"], nl: ["WAT BEWAART", "HET MEERTENS?"] },
       url: "http://localhost:5191/vraag.html", where: "localhost:5191 · mock-up",
       shot: "shots/vraag.jpg", hours: null, prompts: null, solid: false,
       demo: "shots/vraag-demo.mp4", demoCap: { en: "Katwijk aan Zee, then the cornflower", nl: "Katwijk aan Zee, daarna de korenbloem" },
       route: { en: "scraped, plus several dumps", nl: "gescrapet, plus enkele dumps" },
+      kind: { en: "Connect", nl: "Verbinden" },
+      shows: { en: "From a plant to a story, across databanks.", nl: "Van een plant naar een verhaal, over databanken heen." },
       tagline: { en: "One front door: type a place, a name, a year or a word, and get a few places to start.", nl: "Eén voordeur: typ een plaats, naam, jaar of woord en krijg een paar startpunten." },
-      points: {
-        label: { en: "Why this one", nl: "Waarom deze" },
-        en: [
-          "It starts from the visitor's question (a place, a name, a year), not from how the institute is organised.",
-          "It searches every databank at once, down to the single song, story or name.",
-          "It answers with a few places to start, each with a step onward: browsing becomes following connections between databanks.",
-        ],
-        nl: [
-          "Het begint bij de vraag van de bezoeker (een plaats, een naam, een jaar), niet bij de indeling van het instituut.",
-          "Het doorzoekt alle databanken tegelijk, tot op elk lied, verhaal of naam.",
-          "Het geeft een paar plekken om te beginnen, elk met een stap verder: bladeren wordt verbanden volgen.",
-        ],
-      },
       fig: { en: "One question, asked of every databank.", nl: "Eén vraag, gesteld aan elke databank." },
       facts: [[6, { en: "databanks", nl: "databanken" }], [662, { en: "archives", nl: "archieven" }], [1, { en: "search box", nl: "zoekvak" }]],
       source: { en: "Six databanks and the archive catalogue · mock-up", nl: "Zes databanken en archiefcatalogus · mock-up" },

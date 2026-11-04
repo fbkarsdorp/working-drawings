@@ -3,7 +3,7 @@
  * The camera never moves. Each sheet draws its own lines and declares where the objects
  * stand; between sheets the objects travel across the table (an object on both sheets
  * moves from one place to the other; plates pass along like a conveyor). Explorations are
- * loose graphite sketches; the two serious attempts are drawn firmer, in Meertens red. */
+ * loose graphite sketches. */
 (function () {
   "use strict";
   const D = window.DECK;
@@ -46,7 +46,6 @@
   const OBJ = { emblem: "box" }, PHASE = { emblem: 0.3 }, SEED = { emblem: 7000 };
   D.apps.forEach((a, i) => { OBJ[a.id] = a.obj; PHASE[a.id] = i * 0.7; SEED[a.id] = (i + 1) * 300; });
   const appIndex = (a) => D.apps.indexOf(a) + 1;
-  const isFirm = (key) => APP[key] && APP[key].role === "attempt";
   const place = (key, cx, cy, s, o = {}) => ({ key, cx, cy, s, scale: o.scale || 1, delay: o.delay || 0 });
 
   // ---------- prints: the screenshots, printed in graphite ----------
@@ -242,20 +241,17 @@
 
   // a plate: one app, or a sheet built around one app
   function plateSlide(a, o = {}) {
-    const n = appIndex(a), firm = a.role === "attempt";
+    const n = appIndex(a);
     const big = o.big || a.big, tagline = o.tagline || a.tagline;
     const tb = titleBlock(tr(big), 154, 900, 168, 0.92);
-    const el = h("section", "layer ink-paper plate" + (firm ? " firm" : ""));
+    const el = h("section", "layer ink-paper plate");
     const where = h("div", "lbl a1 r where", `<i class="dot"></i>${esc(a.where)}`, { right: px(SW - R), top: px(T) });
     where.dataset.app = a.id;
     el.append(h("div", "lbl a1", o.label || `${esc(tr(D.ui.appendix))} &nbsp;·&nbsp; ${pad2(n)} / ${pad2(D.apps.length)}`, { left: px(L), top: px(T) }), where);
     const col = h("div", "col", undefined, { left: px(L), top: px(tb.bottom + 40), width: px(880) });
     col.append(h("div", "tagline a2", esc(tr(tagline))));
     if (o.body) col.append(h("div", "body a3", esc(tr(o.body))));
-    if (a.points && o.attempt) {
-      col.append(h("div", "real a3", `<span class="lbl">${esc(tr(a.points.label))}</span>` + tr(a.points).map((r, i) => `<div><b>${i + 1}</b><span>${esc(r)}</span></div>`).join("")));
-    }
-    if (!o.body && !o.attempt) {
+    if (!o.body) {
       const hrs = a.hours ? `${fmt(a.hours)} ${esc(tr(D.ui.hours))} · ${a.prompts} ${esc(tr(D.ui.prompts))}` : esc(tr(D.ui.nolog));
       col.append(h("div", "meta a3", `<div><span class="lbl">${esc(tr(D.ui.data))}</span><span>${esc(tr(a.route))}</span></div><div><span class="lbl">${esc(tr(D.ui.built))}</span><span>${hrs}</span></div>`));
     }
@@ -295,12 +291,12 @@
     const el = h("section", "layer ink-paper contact");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
     el.append(h("div", "sheet-text a2", esc(tr(c.text)), { left: px(L), top: px(tb.bottom + 30), width: px(1500) }));
-    const top = 420, cols = 4, gx = (R - L) / cols, gy = (B - top) / 2;
+    const top = 420, cols = 5, gx = (R - L) / cols, gy = (B - top) / 2;
     const objs = [];
     apps.forEach((a, i) => {
       const x = L + (i % cols) * gx, y = top + Math.floor(i / cols) * gy;
-      objs.push(place(a.id, x + gx / 2, y + 62, 52, { scale: 0.72, delay: 0.3 + i * 0.06 }));
-      const b = h("button", "ccell a3", `<span class="lbl">${pad2(appIndex(a))} &nbsp;·&nbsp; ${esc(tr(a.kind))}</span><span class="ccell-name">${esc(a.short)}</span><span class="ccell-q">${esc(tr(a.shows))}</span>`, { left: px(x), top: px(y), width: px(gx), height: px(gy) });
+      objs.push(place(a.id, x + gx / 2, y + 54, 46, { scale: 0.64, delay: 0.3 + i * 0.06 }));
+      const b = h("button", "ccell a3", `<span class="lbl">${esc(tr(a.kind))}</span><span class="ccell-name">${esc(a.short)}</span><span class="ccell-q">${esc(tr(a.shows))}</span>`, { left: px(x), top: px(y), width: px(gx), height: px(gy) });
       b.onclick = () => present(a, { x: x + 20, y: y + 20, w: gx - 40, h: gy - 40 });
       b.title = a.url;
       el.append(b);
@@ -341,7 +337,7 @@
         rule(pen, X0, top - 6, X0, B, clamp(f * 2 - 0.4), 502);
         rows.forEach((a, i) => {
           const y = top + i * rh + rh / 2 - 13;
-          bar(pen, X0, y, a.hours * perH, 26, clamp(f * 1.8 - 0.5 - i * 0.07), 510 + i * 20, a.role === "attempt");
+          bar(pen, X0, y, a.hours * perH, 26, clamp(f * 1.8 - 0.5 - i * 0.07), 510 + i * 20);
         });
       },
     };
@@ -393,7 +389,7 @@
       const ang = -Math.PI / 2 + (i / D.apps.length) * Math.PI * 2, x = C[0] + Math.cos(ang) * RAD, y = C[1] + Math.sin(ang) * RAD;
       pos[a.id] = [x, y, ang];
       objs.push(place(a.id, x, y, 46, { scale: 0.62, delay: 0.4 + i * 0.04 }));
-      el.append(h("div", "rname a4" + (a.role === "attempt" ? " firm" : ""), esc(a.short), { left: px(x - 130), top: px(y + 50), width: px(260) }));
+      el.append(h("div", "rname a4", esc(a.short), { left: px(x - 130), top: px(y + 50), width: px(260) }));
     });
     return {
       kind: "data", el, dur: 2.8, objs,
@@ -404,8 +400,8 @@
           const [x, y, ang] = pos[a.id], dx = Math.cos(ang), dy = Math.sin(ang);
           const x0 = C[0] + dx * 105, y0 = C[1] + dy * 105, x1 = x - dx * 62, y1 = y - dy * 62;
           const fi = clamp(f * 2 - 0.7 - i * 0.04);
-          if (a.solid) rule(pen, x0, y0, x1, y1, fi, 710 + i, { w: 1.2, acc: a.role === "attempt" });
-          else dashed(pen, x0, y0, x1, y1, fi, 710 + i, { w: 1.2, acc: a.role === "attempt" });
+          if (a.solid) rule(pen, x0, y0, x1, y1, fi, 710 + i, { w: 1.2 });
+          else dashed(pen, x0, y0, x1, y1, fi, 710 + i, { w: 1.2 });
         });
         rule(pen, L, 921, L + 64, 921, clamp(f * 2 - 1), 790, { w: 1.2 });
         dashed(pen, L, 961, L + 64, 961, clamp(f * 2 - 1), 791, { w: 1.2 });
@@ -512,13 +508,12 @@
 
   function build() {
     stage.querySelectorAll(".layer").forEach((e) => e.remove());
-    const cab = D.cabinet, attempts = D.apps.filter((a) => a.role === "attempt");
+    const cab = D.cabinet;
     const main = [
       coverSlide(),
       originSlide(),
       Object.assign(plateSlide(APP[cab.app], { main: true, clip: cab.clip, big: cab.big, tagline: cab.tagline, body: cab.body, facts: cab.facts, fig: cab.fig, label: esc(tr(cab.label)) }), { main: true }),
       explorationsSlide(),
-      ...attempts.map((a, i) => Object.assign(plateSlide(a, { main: true, attempt: true, label: `${esc(tr(D.attempts.label))} ${i + 1} / ${attempts.length}` }), { main: true })),
       hoursSlide(),
       scarceSlide(),
       dataSlide(),
@@ -571,7 +566,7 @@
     for (const [s, f] of slidesF) if (f > 0) { s.draw(pen, now, f); if (!(box && box.S === s && !box.closing)) drawPrint(ctx, s, f); }
     for (const { p, f } of objs) {
       if (f <= 0) continue;
-      Ink.drawObject(pen, OBJ[p.key], { cx: p.cx, cy: p.cy, s: p.s, t: now, phase: PHASE[p.key], f, scale: p.scale, seed: SEED[p.key], firm: isFirm(p.key) });
+      Ink.drawObject(pen, OBJ[p.key], { cx: p.cx, cy: p.cy, s: p.s, t: now, phase: PHASE[p.key], f, scale: p.scale, seed: SEED[p.key] });
     }
     flushPaper(pen);
     ctx.restore();
