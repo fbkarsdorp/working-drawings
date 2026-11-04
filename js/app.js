@@ -239,6 +239,23 @@
     };
   }
 
+  // the first prompt, verbatim, typed on a slip taped to the sheet
+  function promptSlide() {
+    const c = D.prompt;
+    const tb = titleBlock(tr(c.big), 154, R - L, 180);
+    const el = h("section", "layer ink-paper promptsheet");
+    labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
+    el.append(h("div", "promptcard a2", `<span class="caret">›</span><span>${esc(c.text)}</span>`, { left: px(L), top: px(tb.bottom + 70), width: px(1420) }));
+    el.append(h("div", "sheet-text a4", esc(tr(c.after)), { left: px(L), top: px(800), width: px(1500) }));
+    return {
+      kind: "prompt", el, dur: 2.2, objs: [],
+      draw(pen, t, f) {
+        drawTitle(pen, tb, clamp(f * 1.3), 301);
+        ticks(pen, f, this.sheet);
+      },
+    };
+  }
+
   // a plate: one app, or a sheet built around one app
   function plateSlide(a, o = {}) {
     const n = appIndex(a);
@@ -512,14 +529,15 @@
     const main = [
       coverSlide(),
       originSlide(),
+      promptSlide(),
       Object.assign(plateSlide(APP[cab.app], { main: true, clip: cab.clip, big: cab.big, tagline: cab.tagline, body: cab.body, facts: cab.facts, fig: cab.fig, label: esc(tr(cab.label)) }), { main: true }),
       explorationsSlide(),
       hoursSlide(),
       scarceSlide(),
       dataSlide(),
       planSlide(),
-      metaSlide(),
       endSlide(),
+      metaSlide(),
     ];
     MAIN = main.length;
     main.forEach((s, i) => (s.sheet = i === 0 ? null : i));
@@ -1003,7 +1021,7 @@
     if (["ArrowRight", "PageDown", " ", "n", "ArrowDown"].includes(k)) { e.preventDefault(); go(cur + 1); }
     else if (["ArrowLeft", "PageUp", "Backspace", "ArrowUp"].includes(k)) { e.preventDefault(); go(cur - 1); }
     else if (k === "Home") go(0);
-    else if (k === "End") go(MAIN - 1);
+    else if (k === "End") go(slides.findIndex((s) => s.kind === "end"));
     else if (k === "Enter") { const S = slides[cur]; if (S.app) { if (e.shiftKey) window.open(S.app.url, "_blank"); else present(S.app, PR, S); } else go(cur + 1); }
     else if (k === "i" || k === "a" || k === "Tab") {
       e.preventDefault();

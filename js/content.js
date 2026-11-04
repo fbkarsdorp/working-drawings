@@ -75,6 +75,16 @@ window.DECK = {
     meet: { who: { en: "Our director suggested", nl: "Onze directeur opperde" }, what: { en: "a cabinet of curiosities.", nl: "een rariteitenkabinet." } },
   },
 
+  // the first prompt, verbatim, from the Museum project's session log (9 October 2026, 10:10).
+  // Claude's first turn on it ran for about 85 minutes.
+  prompt: {
+    label: { en: "The next morning · 9 October", nl: "De ochtend erna · 9 oktober" },
+    right: { en: "Verbatim", nl: "Letterlijk" },
+    big: { en: ["THE PROMPT"], nl: ["DE PROMPT"] },
+    text: "Make a three.js (pnpm) visualization of all the Meertens Collections (https://meertens.knaw.nl/collecties/) like a 17th century Cabinet of curiosities sometimes called wonder-room. Don’t ask questions, it is a one-shot task. Use all the time you need until it becomes a masterpiece.",
+    after: { en: "Claude worked on it for about an hour and a half.", nl: "Claude werkte er ongeveer anderhalf uur aan." },
+  },
+
   cabinet: {
     app: "museum",
     clip: "shots/museum-walk.mp4",
