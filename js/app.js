@@ -239,19 +239,44 @@
     };
   }
 
-  // the first prompt, verbatim, typed on a slip taped to the sheet
+  // the first prompt, verbatim, typed into a terminal line on a slip taped to the sheet.
+  // The full text is laid out invisibly first, so the card keeps its size while it is typed.
   function promptSlide() {
-    const c = D.prompt;
+    const c = D.prompt, text = c.text;
     const tb = titleBlock(tr(c.big), 154, R - L, 180);
     const el = h("section", "layer ink-paper promptsheet");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
-    el.append(h("div", "promptcard a2", `<span class="caret">›</span><span>${esc(c.text)}</span>`, { left: px(L), top: px(tb.bottom + 70), width: px(1420) }));
-    el.append(h("div", "sheet-text a4", esc(tr(c.after)), { left: px(L), top: px(800), width: px(1500) }));
+    const card = h("div", "promptcard a2", `<span class="caret">&gt;</span><span class="line"><span class="typed"></span><span class="cursor"></span><span class="rest"></span></span>`, { left: px(L), top: px(tb.bottom + 70), width: px(1420) });
+    const typed = card.querySelector(".typed"), rest = card.querySelector(".rest");
+    const after = h("div", "sheet-text", esc(tr(c.after)), { left: px(L), top: px(800), width: px(1500) });
+    el.append(card, after);
+    // a typing rhythm: about 35 characters a second, a little uneven, with short pauses after , and .
+    const at = [];
+    let tt = 0.9, r = 7;
+    const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+    for (let i = 0; i < text.length; i++) {
+      tt += 0.019 + rnd() * 0.016;
+      const prev = text[i - 1];
+      if (prev === "." || prev === "?") tt += 0.28; else if (prev === ",") tt += 0.12;
+      at.push(tt);
+    }
+    const done = tt;
+    let shown = -1;
     return {
       kind: "prompt", el, dur: 2.2, objs: [],
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 301);
         ticks(pen, f, this.sheet);
+        const el2 = now - this.enterT;
+        let n = 0;
+        while (n < text.length && at[n] <= el2) n++;
+        if (n !== shown) {
+          shown = n;
+          typed.textContent = text.slice(0, n);
+          rest.textContent = text.slice(n);
+          card.classList.toggle("typing", n > 0 && n < text.length);
+        }
+        after.style.opacity = clamp((el2 - done - 0.7) / 0.6).toFixed(2);
       },
     };
   }

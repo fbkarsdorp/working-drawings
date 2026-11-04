@@ -262,10 +262,15 @@ body.idle .keybar:not(.keep) button, .keybar.off button { pointer-events: none; 
 .snap::before { left: -26px; transform: rotate(-22deg); }
 .snap::after { right: -26px; transform: rotate(24deg); }
 
-/* the prompt sheet: the first prompt, typed on a taped slip */
-.promptcard { box-sizing: border-box; padding: 40px 52px 42px 48px; background: #f7f3e8; display: grid; grid-template-columns: 48px 1fr; transform: rotate(-.6deg);
-  font-weight: 500; font-size: 40px; line-height: 1.38; letter-spacing: -.005em; box-shadow: 0 1px 1px rgba(40, 30, 20, .10), 0 8px 18px -8px rgba(40, 30, 20, .3); }
-.promptcard .caret { color: var(--red); font-weight: 900; }
+/* the prompt sheet: the first prompt, typed into a terminal line on a taped slip */
+.promptcard { box-sizing: border-box; padding: 40px 52px 42px 44px; background: #f7f3e8; display: grid; grid-template-columns: 50px 1fr; transform: rotate(-.6deg);
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-weight: 500; font-size: 33px; line-height: 1.5; letter-spacing: -.01em;
+  box-shadow: 0 1px 1px rgba(40, 30, 20, .10), 0 8px 18px -8px rgba(40, 30, 20, .3); }
+.promptcard .caret { color: var(--red); font-weight: 800; }
+.promptcard .rest { visibility: hidden; }
+.promptcard .cursor { display: inline-block; width: .6em; height: 1.15em; margin-right: -.6em; vertical-align: -.2em; background: var(--red); animation: blink 1.05s steps(1) infinite; }
+.promptcard.typing .cursor { animation: none; }
+@keyframes blink { 50% { opacity: 0; } }
 .promptcard::before, .promptcard::after { content: ""; position: absolute; top: -14px; width: 120px; height: 30px; background: rgba(226, 214, 176, .72); }
 .promptcard::before { left: -30px; transform: rotate(-20deg); }
 .promptcard::after { right: -30px; transform: rotate(18deg); }
