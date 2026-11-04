@@ -13,8 +13,8 @@ it moves on to the next free one and opens the deck there. Press `F` for full sc
 1. **Cover**: *Every day a new interface*, with the eleven drawings in a row.
 2. **Two conversations**: the team leaders on AI for research, and opening the collections
    to a broad audience. Our director suggested a cabinet of curiosities.
-3. **The prompt**: the first prompt for the Museum, verbatim (9 October); Claude worked on it
-   for about an hour and a half.
+3. **The prompt**: a replay of the Claude Code session of 9 October: the prompt typed in, then
+   Claude's real first steps (from the session log) while the timer runs to the 85 minutes it took.
 4. **The day after**: Museum Meertensianum, the director's metaphor built the next day. The
    print frame loops a 36-second walk through the room in graphite. Press ↵ to lay it out
    as a large print on the page, ↵ again (or *Go in live*) to enter the real app, Esc to put

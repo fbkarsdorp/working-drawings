@@ -262,15 +262,29 @@ body.idle .keybar:not(.keep) button, .keybar.off button { pointer-events: none; 
 .snap::before { left: -26px; transform: rotate(-22deg); }
 .snap::after { right: -26px; transform: rotate(24deg); }
 
-/* the prompt sheet: the first prompt, typed into a terminal line on a taped slip */
-.promptcard { box-sizing: border-box; padding: 40px 52px 42px 44px; background: #f7f3e8; display: grid; grid-template-columns: 50px 1fr; transform: rotate(-.6deg);
-  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-weight: 500; font-size: 33px; line-height: 1.5; letter-spacing: -.01em;
+/* the prompt sheet: a Claude Code session on a taped slip (light terminal theme) */
+.cc { box-sizing: border-box; padding: 26px 40px 22px; background: #f7f3e8; transform: rotate(-.4deg); overflow: hidden;
+  --or: #D77757; --ok: #3f8f3f; --dim: #8b8678;
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 25px; line-height: 1.5; color: #1d1c1a; letter-spacing: -.01em;
   box-shadow: 0 1px 1px rgba(40, 30, 20, .10), 0 8px 18px -8px rgba(40, 30, 20, .3); }
-.promptcard .caret { color: var(--red); font-weight: 800; }
-.promptcard .rest { visibility: hidden; }
-.promptcard .cursor { display: inline-block; width: .6em; height: 1.15em; margin-right: -.6em; vertical-align: -.2em; background: var(--red); animation: blink 1.05s steps(1) infinite; }
-.promptcard.typing .cursor { animation: none; }
+.cc::before, .cc::after { content: ""; position: absolute; top: -14px; width: 120px; height: 30px; background: rgba(226, 214, 176, .72); z-index: 1; }
+.cc::before { left: -30px; transform: rotate(-20deg); }
+.cc::after { right: -30px; transform: rotate(18deg); }
+.layer .cc .cc-scroll, .layer .cc .cc-scroll > * { position: static; opacity: 1; }
+.cc-scroll { height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; gap: 14px; }
+.cc-scroll > * { flex-shrink: 0; }
+.cc-dim { color: var(--dim); }
+.cc-or { color: var(--or); }
+.cc-welcome { align-self: flex-start; border: 1.5px solid var(--or); border-radius: 10px; padding: 10px 22px; margin-bottom: 6px; }
+.cc-user, .cc-step, .cc-spin { display: none; }
+.cc-user.on, .cc-spin.on { display: block; }
+.cc-step.on { display: grid; grid-template-columns: 34px 1fr; }
+.cc-user { color: #5d594f; }
+.cc-dot { color: #1d1c1a; }
+.cc-dot.cc-ok { color: var(--ok); }
+.cc-tool { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-input { display: grid; grid-template-columns: 34px 1fr; border: 1.5px solid #b9b3a3; border-radius: 10px; padding: 10px 18px; margin-top: 4px; min-height: 1.5em; }
+.cc-in .cursor { display: inline-block; width: .6em; height: 1.2em; margin-right: -.6em; vertical-align: -.22em; background: #1d1c1a; animation: blink 1.05s steps(1) infinite; }
+.cc-input.typing .cursor { animation: none; }
 @keyframes blink { 50% { opacity: 0; } }
-.promptcard::before, .promptcard::after { content: ""; position: absolute; top: -14px; width: 120px; height: 30px; background: rgba(226, 214, 176, .72); }
-.promptcard::before { left: -30px; transform: rotate(-20deg); }
-.promptcard::after { right: -30px; transform: rotate(18deg); }
+.cc-hint { font-size: 19px; margin: -6px 0 0 20px; }

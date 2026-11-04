@@ -75,14 +75,24 @@ window.DECK = {
     meet: { who: { en: "Our director suggested", nl: "Onze directeur opperde" }, what: { en: "a cabinet of curiosities.", nl: "een rariteitenkabinet." } },
   },
 
-  // the first prompt, verbatim, from the Museum project's session log (9 October 2026, 10:10).
-  // Claude's first turn on it ran for about 85 minutes.
+  // the first prompt and what followed, verbatim from the Museum project's Claude Code session
+  // log (9 October 2026, 10:10). Claude's first turn ran for about 85 minutes, with 178 tool calls.
   prompt: {
     label: { en: "The next morning · 9 October", nl: "De ochtend erna · 9 oktober" },
-    right: { en: "Verbatim", nl: "Letterlijk" },
+    right: { en: "From the session log", nl: "Uit de sessielog" },
     big: { en: ["THE PROMPT"], nl: ["DE PROMPT"] },
+    cwd: "~/projects/curiosity",
     text: "Make a three.js (pnpm) visualization of all the Meertens Collections (https://meertens.knaw.nl/collecties/) like a 17th century Cabinet of curiosities sometimes called wonder-room. Don’t ask questions, it is a one-shot task. Use all the time you need until it becomes a masterpiece.",
-    after: { en: "Claude worked on it for about an hour and a half.", nl: "Claude werkte er ongeveer anderhalf uur aan." },
+    // what Claude printed, in order; at: simulated seconds into the turn (for the timer)
+    steps: [
+      { at: 4, msg: "I'll start by researching the actual collections, then build the cabinet." },
+      { at: 12, tool: "Bash", arg: "curl -sL https://meertens.knaw.nl/collecties/ …" },
+      { at: 40, msg: "This is the jackpot: the archive site lists 662 collections in a hierarchy (sections → subsections → items). Fetching it all." },
+      { at: 120, msg: "pnpm 10 is working. I'm scaffolding the Vite + three.js project, then writing a scraper for all collections." },
+      { at: 150, more: "⋮ 174 more tool calls, 39 more messages" },
+      { at: 5100, msg: "The Museum Meertensianum is built: a three.js and pnpm walk-through of every Meertens collection as a 17th-century Wunderkammer, lit by Vermeer-style afternoon sun." },
+    ],
+    worked: 5100,
   },
 
   cabinet: {

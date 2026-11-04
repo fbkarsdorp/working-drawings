@@ -239,20 +239,33 @@
     };
   }
 
-  // the first prompt, verbatim, typed into a terminal line on a slip taped to the sheet.
-  // The full text is laid out invisibly first, so the card keeps its size while it is typed.
+  // the first prompt, replayed as a Claude Code session on a slip taped to the sheet: the prompt
+  // is typed into the input box, sent, and Claude's real first steps scroll by while the timer
+  // runs fast to the 85 minutes the turn took. Everything is driven by the time since the sheet
+  // was entered, so coming back replays it.
   function promptSlide() {
     const c = D.prompt, text = c.text;
-    const tb = titleBlock(tr(c.big), 154, R - L, 180);
+    const tb = titleBlock(tr(c.big), 154, R - L, 150);
     const el = h("section", "layer ink-paper promptsheet");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
-    const card = h("div", "promptcard a2", `<span class="caret">&gt;</span><span class="line"><span class="typed"></span><span class="cursor"></span><span class="rest"></span></span>`, { left: px(L), top: px(tb.bottom + 70), width: px(1420) });
-    const typed = card.querySelector(".typed"), rest = card.querySelector(".rest");
-    const after = h("div", "sheet-text", esc(tr(c.after)), { left: px(L), top: px(800), width: px(1500) });
-    el.append(card, after);
-    // a typing rhythm: about 35 characters a second, a little uneven, with short pauses after , and .
+    const top = tb.bottom + 46;
+    const card = h("div", "cc a2", undefined, { left: px(L), top: px(top), width: px(R - L), height: px(B - top) });
+    const sc = h("div", "cc-scroll");
+    const line = (cls, html) => { const d = h("div", cls, html); sc.append(d); return d; };
+    line("cc-welcome", `<span class="cc-or">✻</span> Welcome to <b>Claude Code</b>!<br><span class="cc-dim">cwd: ${esc(c.cwd)}</span>`);
+    const user = line("cc-user", `<span class="cc-dim">&gt;</span> ${esc(text)}`);
+    const steps = c.steps.map((st) => line("cc-step", st.msg ? `<span class="cc-dot">⏺</span><span>${esc(st.msg)}</span>`
+      : st.tool ? `<span class="cc-dot cc-ok">⏺</span><span class="cc-tool"><b>${esc(st.tool)}</b>(${esc(st.arg)})</span>` : `<span></span><span class="cc-dim">${esc(st.more)}</span>`));
+    const spin = line("cc-spin", "");
+    const input = line("cc-input", `<span class="cc-dim">&gt;</span><span class="cc-in"><span class="typed"></span><span class="cursor"></span></span>`);
+    line("cc-hint cc-dim", "? for shortcuts");
+    const typed = input.querySelector(".typed");
+    card.append(sc);
+    el.append(card);
+
+    // typing rhythm: about 35 characters a second, uneven, with pauses after , and .
     const at = [];
-    let tt = 0.9, r = 7;
+    let tt = 1.0, r = 7;
     const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
     for (let i = 0; i < text.length; i++) {
       tt += 0.019 + rnd() * 0.016;
@@ -260,23 +273,43 @@
       if (prev === "." || prev === "?") tt += 0.28; else if (prev === ",") tt += 0.12;
       at.push(tt);
     }
-    const done = tt;
-    let shown = -1;
+    const SENT = tt + 0.7, GO = SENT + 0.4;
+    // when each step appears (seconds after GO), and the simulated clock at that moment
+    const show = [0.8, 1.6, 2.6, 3.6, 4.6, 7.4];
+    const simAt = (u) => {
+      if (u <= 0) return 0;
+      for (let i = 0; i < show.length; i++) {
+        const t0 = i ? show[i - 1] : 0, s0 = i ? c.steps[i - 1].at : 0;
+        if (u <= show[i]) return s0 + (c.steps[i].at - s0) * ((u - t0) / (show[i] - t0));
+      }
+      return c.worked;
+    };
+    const dur = (s) => { s = Math.floor(s); const hh = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return hh ? `${hh}h ${m}m` : m ? `${m}m ${ss}s` : `${ss}s`; };
+    const GLYPH = "·✢✳✶✻✽✻✶✳✢", VERB = ["Researching", "Harvesting", "Scaffolding", "Crafting", "Building"];
+    let last = "";
     return {
       kind: "prompt", el, dur: 2.2, objs: [],
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 301);
         ticks(pen, f, this.sheet);
-        const el2 = now - this.enterT;
+        const e = now - this.enterT;
         let n = 0;
-        while (n < text.length && at[n] <= el2) n++;
-        if (n !== shown) {
-          shown = n;
-          typed.textContent = text.slice(0, n);
-          rest.textContent = text.slice(n);
-          card.classList.toggle("typing", n > 0 && n < text.length);
-        }
-        after.style.opacity = clamp((el2 - done - 0.7) / 0.6).toFixed(2);
+        while (n < text.length && at[n] <= e) n++;
+        const sent = e >= SENT, u = e - GO, done = u >= show[show.length - 1];
+        const shownSteps = sent ? show.filter((x) => u >= x).length : 0;
+        const sim = simAt(u);
+        const spinTxt = !sent || u < 0 ? "" : done ? `<span class="cc-or">✻</span> <span class="cc-dim">Worked for ${dur(c.worked)}</span>`
+          : `<span class="cc-or">${GLYPH[Math.floor(e * 8) % GLYPH.length]} ${VERB[Math.min(VERB.length - 1, Math.floor(u / 1.6))]}…</span> <span class="cc-dim">(${dur(sim)} · esc to interrupt)</span>`;
+        const sig = [n, sent, shownSteps, spinTxt].join("|");
+        if (sig === last) return;
+        last = sig;
+        typed.textContent = sent ? "" : text.slice(0, n);
+        input.classList.toggle("typing", n > 0 && !sent);
+        user.classList.toggle("on", sent);
+        steps.forEach((d, i) => d.classList.toggle("on", i < shownSteps));
+        spin.innerHTML = spinTxt;
+        spin.classList.toggle("on", !!spinTxt);
+        sc.scrollTop = sc.scrollHeight; // like a terminal: fill from the top, then scroll
       },
     };
   }
