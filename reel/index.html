@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Working Drawings · reel</title>
+<link rel="stylesheet" href="../css/geist.css">
+<style>html,body{margin:0;background:#111;overflow:hidden}canvas{display:block;max-width:100vw;max-height:100vh;margin:auto}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="../js/opentype.min.js"></script>
+<script src="../js/font-geist-black.js"></script>
+<script src="../js/content.js"></script>
+<script src="../js/mesh.js"></script>
+<script src="../js/objects.js"></script>
+<script src="../js/ink.js"></script>
+<script src="../js/type.js"></script>
+<script>
+/* Working Drawings · a 20-second reel, drawn with the deck's own pencil engine.
+ *
+ * The whole reel is one working drawing: a large sheet on the drafting table with the eleven apps
+ * taped on as prints, each with its pencil drawing, its name hatched in, and its build time as an
+ * architectural dimension. A camera flies over the sheet; it opens and closes on the sheet's
+ * title block. Every frame is a pure function of t: renderFrame(t) renders several sub-frames
+ * when the camera moves fast and averages them (motion blur). render.py renders all 600 frames,
+ * synthesises the sound from window.EVENTS and muxes the result. index.html?play previews live.
+ *
+ * 120 bpm, a beat is 0.5 s. 0–2 s title block · 2.0 drop: the eleven apps, arriving on the beat
+ * (a burst of hard cuts at 10–11.6 s) · 15 s the camera pulls back to the whole sheet while the
+ * route is drawn · 17.1 s it dives into the title block · 18.0 s the stamp. */
+"use strict";
+const W = 1920, H = 1080, FPS = 30, DUR = 20, DEG = Math.PI / 180;
+const D = window.DECK, tr = (o) => (o && o.en !== undefined ? o.en : o);
+const RED = "#C8223F", INK = "#16161A", PAPER = "#EDE6D5", CARD = "#f8f4ea";
+const mk = (w = W, h = H) => { const k = document.createElement("canvas"); k.width = w; k.height = h; return k; };
+const c = document.getElementById("c"), ctx = c.getContext("2d");
+const ic = mk(), ictx = ic.getContext("2d");      // the pencil layer
+const acc = mk(), actx = acc.getContext("2d");    // motion-blur accumulator
+ctx.imageSmoothingQuality = "high";
+Ink.makeBackgrounds({ W, H, dpr: 1, scale: 1, ox: 0, oy: 0 });
+Type.init();
+
+// ---------- easing ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, u) => a + (b - a) * u;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const outCubic = (u) => 1 - Math.pow(1 - u, 3);
+const inOutCubic = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+const inOutQuart = (u) => (u < 0.5 ? 8 * u ** 4 : 1 - Math.pow(-2 * u + 2, 4) / 2);
+const outExpo = (u) => (u >= 1 ? 1 : 1 - Math.pow(2, -10 * u));
+const inOutExpo = (u) => (u <= 0 ? 0 : u >= 1 ? 1 : u < 0.5 ? Math.pow(2, 20 * u - 10) / 2 : (2 - Math.pow(2, -20 * u + 10)) / 2);
+const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- the sheet ----------
+const CW = 1760, CH = 990, GX = 220, GY = 220, MX = 300, MY = 300;           // a cell is one 16:9 view
+const SW = MX * 2 + 4 * CW + 3 * GX, SH = MY * 2 + 3 * CH + 2 * GY;         // 8300 x 4010
+const S0 = (W / CW) * 0.93;                                                  // a cell, with a margin
+const BY = {}; D.apps.forEach((a) => (BY[a.id] = a));
+// visit order (the deck's order), grid position (a snake), arrival and departure on the beat
+const ST = [
+  { id: "museum", r: 0, c: 0, a: 2.0, l: 3.1, v: [0, 0, 1.0, -0.8] },
+  { id: "liederenbank", r: 0, c: 1, a: 3.5, l: 4.6, v: [20, 0, 1.03, 0.8] },
+  { id: "dwaallicht", r: 0, c: 2, a: 5.0, l: 6.1, v: [-10, 0, 1.0, -0.7] },
+  { id: "pland", r: 0, c: 3, a: 6.5, l: 7.1, v: [0, 0, 1.04, 0.9] },
+  { id: "spindle", r: 1, c: 3, a: 7.5, l: 8.6, v: [-20, 0, 1.02, -0.9] },
+  { id: "water", r: 1, c: 2, a: 9.0, l: 9.6, v: [10, 0, 1.04, 0.6] },
+  { id: "rrh", r: 1, c: 1, a: 10.0, l: 10.5, v: [0, 0, 1.05, -1.0], cutOut: true },
+  { id: "sagenland", r: 1, c: 0, a: 10.5, l: 11.0, v: [0, 0, 1.05, 0.9], cutIn: true, cutOut: true },
+  { id: "nachtdienst", r: 2, c: 0, a: 11.0, l: 11.6, v: [0, 0, 1.04, -0.8], cutIn: true },
+  { id: "atlas", r: 2, c: 1, a: 12.0, l: 12.6, v: [0, 0, 1.02, 0.9] },
+  { id: "vraag", r: 2, c: 2, a: 13.0, l: 15.0, v: [0, 0, 1.0, -0.5] },
+];
+const CUTS = [10.5, 11.0];
+function cellOrigin(r, col, jitter = true) {
+  const k = r * 4 + col;
+  return { x: MX + col * (CW + GX) + (jitter ? (hash(k + 11) - 0.5) * 80 : 0), y: MY + r * (CH + GY) + (jitter ? (hash(k + 29) - 0.5) * 60 : 0) };
+}
+const TBO = cellOrigin(2, 3, false);                                         // the title block
+const PR = { x: 100, y: 180, w: 960, h: 600 };                               // the print, in a cell
+ST.forEach((s, i) => {
+  s.i = i; s.app = BY[s.id]; s.o = cellOrigin(s.r, s.c);
+  s.sp = s.cutIn || s.cutOut ? 1.8 : 1;                                      // annotation speed
+  s.rot = (hash(i + 3) - 0.5) * 2.4 * DEG;                                   // the print sits a little askew
+  s.name = tr(s.app.big).join(" ");
+  s.nameSize = Math.min(112, Type.fit([s.name], 1560, 112));
+  s.kind = (s.app.kind ? tr(s.app.kind) : "The spark").toUpperCase();
+  s.fact = s.app.facts[0];
+});
+
+// ---------- media: screenshots, and the recorded demos as frames (extracted by render.py) ----------
+const VIDEOS = { museum: 9.0, liederenbank: 20.5, dwaallicht: 16.0, vraag: 12.5 }, VSPEED = 1.25, VFRAMES = 120;
+const img = {}, vcache = new Map(), vcur = {};
+const load = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+function vframe(id, k) {
+  k = Math.max(1, Math.min(VFRAMES, k));
+  const key = id + ":" + k;
+  if (!vcache.has(key)) vcache.set(key, load(`.frames/${id}/${String(k).padStart(3, "0")}.jpg`));
+  return vcache.get(key);
+}
+async function prepare(t) {
+  await Promise.all(ST.filter((s) => s.id in VIDEOS).map(async (s) => {
+    const im = await vframe(s.id, 1 + Math.floor(Math.max(0, t - (s.a - 0.25)) * VSPEED * FPS));
+    vcur[s.id] = im || img[s.id];
+  }));
+}
+
+// ---------- textures ----------
+function paperTextures() {
+  const g = mk(), x = g.getContext("2d"), id = x.createImageData(W, H), d = id.data;
+  for (let i = 0; i < W * H; i++) {
+    const r = Math.random(), v = 255 - Math.pow(r, 6) * 40 - Math.random() * 6;
+    d[i * 4] = v; d[i * 4 + 1] = v * 0.996; d[i * 4 + 2] = v * 0.986; d[i * 4 + 3] = 255;
+  }
+  x.putImageData(id, 0, 0);
+  x.lineCap = "round";
+  for (let i = 0; i < 420; i++) {
+    const px = Math.random() * W, py = Math.random() * H, a = Math.random() * 6.28, L = 6 + Math.random() * 22;
+    x.strokeStyle = Math.random() < 0.6 ? "rgba(120,100,70,0.08)" : "rgba(255,255,255,0.3)"; x.lineWidth = 0.6;
+    x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + Math.cos(a + 0.5) * L / 2, py + Math.sin(a + 0.5) * L / 2, px + Math.cos(a) * L, py + Math.sin(a) * L); x.stroke();
+  }
+  const tone = mk(), tx = tone.getContext("2d"), tg = tx.createRadialGradient(W * 0.45, H * 0.4, 0, W / 2, H / 2, W * 0.75);
+  tg.addColorStop(0, "rgba(255,252,240,0.38)"); tg.addColorStop(1, "rgba(175,155,115,0.14)");
+  tx.fillStyle = tg; tx.fillRect(0, 0, W, H);
+  const vig = mk(), vx = vig.getContext("2d"), vg = vx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.68);
+  vg.addColorStop(0, "rgba(40,28,16,0)"); vg.addColorStop(1, "rgba(40,28,16,0.24)");
+  vx.fillStyle = vg; vx.fillRect(0, 0, W, H);
+  return { grain: g, tone, vig };
+}
+// the rubber stamp: red Geist Black in a border, with ink texture knocked out
+const STAMP = { text: "A NEW INTERFACE", size: 100, pad: 28, k: 2 };
+function makeStamp() {
+  const { text, size, pad, k } = STAMP, m = mk(8, 8).getContext("2d");
+  m.font = `900 ${size}px Geist`; m.letterSpacing = "1px";
+  const tw = m.measureText(text).width, cap = size * 0.72, bw = tw + 2 * pad, bh = cap + 2 * pad;
+  const cv = mk(Math.ceil((bw + 12) * k), Math.ceil((bh + 12) * k)), x = cv.getContext("2d");
+  x.scale(k, k); x.fillStyle = RED; x.strokeStyle = RED;
+  x.font = `900 ${size}px Geist`; x.letterSpacing = "1px"; x.fillText(text, 6 + pad, 6 + pad + cap);
+  x.lineWidth = 7; x.strokeRect(6 + 3.5, 6 + 3.5, bw - 7, bh - 7);
+  x.globalCompositeOperation = "destination-out";
+  let r = 99; const rnd = () => ((r = (r * 9301 + 49297) % 233280) / 233280);
+  for (let i = 0; i < 5200; i++) { x.globalAlpha = 0.25 + rnd() * 0.75; x.beginPath(); x.arc(rnd() * (bw + 12), rnd() * (bh + 12), rnd() < 0.92 ? rnd() * 1.1 : 1 + rnd() * 2.6, 0, 6.29); x.fill(); }
+  x.lineWidth = 0.8;
+  for (let i = 0; i < 70; i++) { x.globalAlpha = 0.18 + rnd() * 0.3; const yy = rnd() * (bh + 12), xx = rnd() * (bw + 12); x.beginPath(); x.moveTo(xx, yy); x.lineTo(xx + 20 + rnd() * 90, yy + (rnd() - 0.5) * 3); x.stroke(); }
+  return { cv, bw: bw + 12, bh: bh + 12, cap };
+}
+let TX = null, STAMPCV = null;
+
+// ---------- the camera ----------
+function stationView(i, t) {
+  const s = ST[i], [dx, dy, sm, rot] = s.v, u = inOutCubic(seg(t, s.a, s.l));
+  let cx = s.o.x + CW / 2 + dx, cy = s.o.y + CH / 2 + dy;
+  if (s.id === "vraag") { cx -= 110 * u; cy -= 10 * u; } else cx += 18 * u * (i % 2 ? 1 : -1);
+  const dolly = s.id === "vraag" ? 0.07 : s.sp > 1 ? 0.05 : 0.03;
+  const punch = t >= s.a ? Math.exp(-(t - s.a) * 10) * (i === 0 ? 0.05 : 0.025) : 0;   // a kick on the beat
+  return { cx, cy, s: S0 * sm * (1 + dolly * u) * (1 + punch), rot: rot * DEG };
+}
+// a whip between stations: pull back, swing (banking into the move), push in
+function moveView(A, B, u) {
+  const e = inOutQuart(u), dist = Math.hypot(B.cx - A.cx, B.cy - A.cy), dip = clamp(dist / 9000, 0.14, 0.62);
+  const ls = lerp(Math.log(A.s), Math.log(B.s), e) + Math.log(1 - dip * Math.sin(Math.PI * u));
+  const bank = Math.sign(B.cx - A.cx || 1) * 2.2 * DEG * Math.sin(Math.PI * u);
+  return { cx: lerp(A.cx, B.cx, e), cy: lerp(A.cy, B.cy, e), s: Math.exp(ls), rot: lerp(A.rot, B.rot, e) + bank };
+}
+// a zoom that keeps B's centre moving in a straight line to the middle of the frame
+function zoomView(A, B, e) {
+  const s = Math.exp(lerp(Math.log(A.s), Math.log(B.s), e)), k = (1 - e) * A.s / s;
+  return { cx: B.cx - (B.cx - A.cx) * k, cy: B.cy - (B.cy - A.cy) * k, s, rot: lerp(A.rot, B.rot, e) };
+}
+function openView(t) {
+  const u = outExpo(seg(t, 0, 0.9));
+  return { cx: TBO.x + lerp(560, 700, u), cy: TBO.y + lerp(240, 290, u), s: lerp(1.95, 1.36, u) * (1 + 0.03 * seg(t, 0.9, 1.5)), rot: lerp(-5, -2, u) * DEG };
+}
+const SHEETV = { cx: SW / 2, cy: SH / 2, s: Math.min(W / SW, H / SH) * 0.965, rot: 0 };
+const ENDV = { cx: TBO.x + 880, cy: TBO.y + 497, s: 1.0, rot: -0.5 * DEG };
+const T_OPEN = 1.5, T_PULL = [15.0, 16.7], T_DIVE = [17.1, 18.0], T_STAMP = 18.0;
+function camAt(t) {
+  if (t < T_OPEN) return openView(t);
+  if (t < ST[0].a) return moveView(openView(T_OPEN), stationView(0, ST[0].a), seg(t, T_OPEN, ST[0].a));
+  for (let i = 0; i < ST.length; i++) {
+    const s = ST[i], n = ST[i + 1];
+    if (t < s.l) return stationView(i, t);
+    if (n && t < n.a) return moveView(stationView(i, s.l), stationView(i + 1, n.a), seg(t, s.l, n.a));
+  }
+  if (t < T_PULL[1]) return zoomView(stationView(ST.length - 1, T_PULL[0]), SHEETV, inOutCubic(seg(t, T_PULL[0], T_PULL[1])));
+  const hold = { ...SHEETV, s: SHEETV.s * 1.014 };
+  if (t < T_DIVE[0]) return { ...SHEETV, s: SHEETV.s * (1 + 0.014 * seg(t, T_PULL[1], T_DIVE[0])) };
+  if (t < T_DIVE[1]) return zoomView(hold, ENDV, inOutExpo(seg(t, T_DIVE[0], T_DIVE[1])));
+  return { ...ENDV, s: ENDV.s * (1 + 0.03 * inOutCubic(seg(t, T_DIVE[1], DUR))) };
+}
+function shake(t) {
+  let x = 0, y = 0;
+  for (const [h, amp] of [[2.0, 5], [T_STAMP, 13]]) if (t >= h) { const k = amp * Math.exp(-(t - h) * 12); x += k * Math.sin((t - h) * 95); y += k * Math.cos((t - h) * 71); }
+  return [x, y];
+}
+function mat(v, t) {
+  const cs = Math.cos(v.rot) * v.s, sn = Math.sin(v.rot) * v.s, [sx, sy] = shake(t);
+  return { a: cs, b: sn, c: -sn, d: cs, e: W / 2 + sx - (cs * v.cx - sn * v.cy), f: H / 2 + sy - (sn * v.cx + cs * v.cy), s: v.s };
+}
+const apply = (M, x, y) => [M.a * x + M.c * y + M.e, M.b * x + M.d * y + M.f];
+function inv(M, x, y) {
+  const det = M.a * M.d - M.b * M.c, X = x - M.e, Y = y - M.f;
+  return [(M.d * X - M.c * Y) / det, (-M.b * X + M.a * Y) / det];
+}
+function viewBox(M) {
+  const pts = [[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => inv(M, x, y));
+  return { x0: Math.min(...pts.map((p) => p[0])), x1: Math.max(...pts.map((p) => p[0])), y0: Math.min(...pts.map((p) => p[1])), y1: Math.max(...pts.map((p) => p[1])) };
+}
+const inView = (o, vb, m = 260) => o.x + CW + m > vb.x0 && o.x - m < vb.x1 && o.y + CH + m > vb.y0 && o.y - m < vb.y1;
+const setM = (M) => ctx.setTransform(M.a, M.b, M.c, M.d, M.e, M.f);
+
+// ---------- motion blur: more sub-frames the faster the frame moves ----------
+const SHUTTER = 0.5 / FPS;   // a 180-degree shutter
+function subTimes(t, still) {
+  if (still) return [t];
+  let t0 = t - SHUTTER / 2, t1 = t + SHUTTER / 2;
+  for (const k of CUTS) if (t0 < k && k <= t1) { if (t >= k) t0 = k; else t1 = k - 1e-4; }   // never blur across a cut
+  const A = mat(camAt(t0), t0), B = mat(camAt(t1), t1);
+  let disp = 0;
+  for (const [x, y] of [[0, 0], [W, 0], [0, H], [W, H], [W / 2, H / 2]]) { const p = inv(A, x, y), q = apply(B, p[0], p[1]); disp = Math.max(disp, Math.hypot(q[0] - x, q[1] - y)); }
+  let n = clamp(Math.ceil(disp / 3.5), 1, 14);
+  if (t > T_STAMP - 0.04 && t < T_STAMP + 0.1) n = Math.max(n, 8);
+  return n === 1 ? [t] : Array.from({ length: n }, (_, i) => t0 + (t1 - t0) * (i + 0.5) / n);
+}
+
+// ---------- pencil, through the camera ----------
+// a pen that takes sheet coordinates: lines are mapped to the screen before the pencil wobble,
+// so the strokes keep their weight and character at every zoom
+function proxy(pen, M) {
+  return {
+    ink: "paper",
+    line(p, o) { const q = new Array(p.length); for (let i = 0; i < p.length; i += 2) { q[i] = M.a * p[i] + M.c * p[i + 1] + M.e; q[i + 1] = M.b * p[i] + M.d * p[i + 1] + M.f; } pen.line(q, o); },
+    rect() {},
+  };
+}
+function flushInk(pen) {
+  ictx.setTransform(1, 0, 0, 1, 0, 0); ictx.clearRect(0, 0, W, H);
+  pen.flush(ictx);
+  ictx.globalCompositeOperation = "destination-out"; ictx.drawImage(Ink.tooth(), 0, 0); ictx.globalCompositeOperation = "source-over";
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "multiply"; ctx.drawImage(ic, 0, 0); ctx.restore();
+}
+const rectPts = (x, y, w, h) => [x, y, x + w, y, x + w, y + h, x, y + h, x, y];
+const circlePts = (cx, cy, r, n = 40) => { const p = []; for (let i = 0; i <= n; i++) { const a = -Math.PI / 2 + (i / n) * Math.PI * 2; p.push(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } return p; };
+function ellipsePts(cx, cy, rx, ry, turns = 1.12, n = 64) {
+  const p = [];
+  for (let i = 0; i <= n; i++) { const a = -2.6 + (i / n) * Math.PI * 2 * turns, k = 1 + 0.05 * (i / n); p.push(cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k + (i / n) * 8); }
+  return p;
+}
+
+// ---------- type set on the sheet ----------
+const MC = mk(8, 8).getContext("2d");
+function textW(str, size, w = 800, track = 0) { MC.font = `${w} ${size}px Geist`; MC.letterSpacing = track + "px"; return MC.measureText(str).width; }
+function text(str, x, y, size, color, o = {}) {
+  ctx.font = `${o.w || 700} ${size}px Geist`; ctx.fillStyle = color; ctx.textAlign = o.align || "left";
+  ctx.letterSpacing = (o.track || 0) + "px"; ctx.globalAlpha = o.alpha === undefined ? 1 : o.alpha;
+  ctx.fillText(str, x, y);
+  ctx.globalAlpha = 1; ctx.letterSpacing = "0px"; ctx.textAlign = "left";
+}
+const fmtH = (h) => h.toFixed(1) + " h";
+const DIM = { y: 136, top: 172, label: 40 };
+
+// ---------- the scene ----------
+function grid(M, vb, s) {
+  setM(M);
+  const lw = 1.1 / s, fade = clamp((60 * s - 6) / 10);
+  ctx.fillStyle = RED;
+  const x0 = Math.floor(vb.x0 / 60) * 60, y0 = Math.floor(vb.y0 / 60) * 60;
+  for (let x = x0; x <= vb.x1; x += 60) { const major = x % 300 === 0; ctx.globalAlpha = major ? 0.22 : 0.11 * fade; if (ctx.globalAlpha > 0.004) ctx.fillRect(x - lw / 2, vb.y0, lw, vb.y1 - vb.y0); }
+  for (let y = y0; y <= vb.y1; y += 60) { const major = y % 300 === 0; ctx.globalAlpha = major ? 0.22 : 0.11 * fade; if (ctx.globalAlpha > 0.004) ctx.fillRect(vb.x0, y - lw / 2, vb.x1 - vb.x0, lw); }
+  ctx.globalAlpha = 1;
+}
+function cover(src, x, y, w, h, zoom = 1, px = 0.5, py = 0.35) {
+  if (!src) return;
+  const sw = src.naturalWidth || src.width, sh = src.naturalHeight || src.height;
+  const k = Math.max(w / sw, h / sh) * zoom, cw = w / k, ch = h / k;
+  ctx.drawImage(src, (sw - cw) * px, (sh - ch) * py, cw, ch, x, y, w, h);
+}
+const landing = (s) => (s.cutIn ? [s.a, s.a + 0.1] : [s.a - 0.22, s.a]);
+function drawPrint(M, s, t) {
+  const [L0, L1] = landing(s);
+  if (t < L0) return;
+  const land = seg(t, L0, L1), lift = 1 - outCubic(land);
+  const dev = seg(t, s.a + 0.02, s.a + 0.45 / s.sp);
+  const { x, y, w, h } = PR, cx = s.o.x + x + w / 2, cy = s.o.y + y + h / 2, sc = 1 + 0.07 * lift;
+  setM(M); ctx.translate(cx, cy); ctx.rotate(s.rot); ctx.scale(sc, sc);
+  ctx.globalAlpha = clamp(land * 5);
+  ctx.save();
+  ctx.shadowColor = `rgba(40,30,20,${0.3 + 0.12 * lift})`; ctx.shadowBlur = (16 + 46 * lift) * M.s; ctx.shadowOffsetY = (7 + 34 * lift) * M.s;
+  ctx.fillStyle = CARD; ctx.fillRect(-w / 2 - 14, -h / 2 - 14, w + 28, h + 28);
+  ctx.restore();
+  const src = s.id in VIDEOS ? vcur[s.id] : img[s.id], kb = 1 + 0.05 * seg(t, s.a, s.l + 0.6);
+  cover(src, -w / 2, -h / 2, w, h, kb);
+  if (dev < 1) {
+    // the print develops from graphite to colour behind a slanted edge
+    const X = lerp(-w / 2 - 220, w / 2 + 220, outCubic(dev)), xt = X - 150, xb = X + 150;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(xt, -h / 2); ctx.lineTo(w / 2 + 2, -h / 2); ctx.lineTo(w / 2 + 2, h / 2); ctx.lineTo(xb, h / 2); ctx.closePath(); ctx.clip();
+    ctx.filter = "grayscale(1) contrast(0.86) brightness(1.12)"; cover(src, -w / 2, -h / 2, w, h, kb); ctx.filter = "none";
+    ctx.restore();
+    if (dev > 0) { ctx.save(); ctx.beginPath(); ctx.rect(-w / 2, -h / 2, w, h); ctx.clip(); ctx.strokeStyle = RED; ctx.lineWidth = 4; ctx.globalAlpha *= 0.85; ctx.beginPath(); ctx.moveTo(xt, -h / 2); ctx.lineTo(xb, h / 2); ctx.stroke(); ctx.restore(); }
+  }
+  ctx.fillStyle = "rgba(226,214,176,0.8)";
+  for (const [tx, ang] of [[-w / 2 + 70, -0.5], [w / 2 - 70, 0.45]]) { ctx.save(); ctx.translate(tx, -h / 2 - 4); ctx.rotate(ang); ctx.fillRect(-62, -17, 124, 34); ctx.restore(); }
+  ctx.globalAlpha = 1;
+}
+function crosshairs(P, x, y, w, h, seed) {
+  for (const [cx, cy] of [[x, y], [x + w, y], [x, y + h], [x + w, y + h]]) {
+    P.line([cx - 18, cy, cx + 18, cy], { kind: "rule", w: 0.7, seed: seed++ });
+    P.line([cx, cy - 18, cx, cy + 18], { kind: "rule", w: 0.7, seed: seed++ });
+  }
+}
+function dimension(P, x0, x1, y, top, f, gapL, gapR, seed) {
+  const fe = clamp(f * 3);
+  P.line([x0, top, x0, top - (top - y + 24) * fe], { kind: "rule", w: 0.8, seed });
+  P.line([x1, top, x1, top - (top - y + 24) * fe], { kind: "rule", w: 0.8, seed: seed + 1 });
+  const fl = clamp(f * 1.6 - 0.15);
+  if (fl > 0) { P.line([x0, y, gapL, y], { kind: "rule", w: 1.1, f: fl, seed: seed + 2 }); P.line([x1, y, gapR, y], { kind: "rule", w: 1.1, f: fl, seed: seed + 3 }); }
+  if (f > 0.3) for (const [xx, k] of [[x0, 4], [x1, 5]]) P.line([xx - 13, y + 13, xx + 13, y - 13], { kind: "rule", w: 1.5, seed: seed + k });
+}
+function stationInk(P, s, t, camS) {
+  const { x, y } = s.o, a = s.a, sp = s.sp, visited = t >= a - 0.05, i = s.i, seed = 2000 + i * 211;
+  crosshairs(P, x, y, CW, CH, seed);
+  if (t < landing(s)[0]) {   // an empty frame with a cross: an image still to come
+    const { x: px, y: py, w, h } = PR;
+    P.line(rectPts(x + px, y + py, w, h), { kind: "rule", w: 1.3, seed: seed + 10 });
+    P.line([x + px, y + py, x + px + w, y + py + h], { kind: "rule", w: 0.9, seed: seed + 11 });
+    P.line([x + px + w, y + py, x + px, y + py + h], { kind: "rule", w: 0.9, seed: seed + 12 });
+  }
+  P.line(circlePts(x + 88, y + 64, 44), { kind: "rule", w: visited ? 1.5 : 0.95, acc: visited, closed: true, seed: seed + 20 });
+  if (!visited) return;
+  const fd = seg(t, a + 0.03, a + 0.45 / sp);
+  if (fd > 0 && s.app.hours) {
+    const mid = x + PR.x + PR.w / 2, g = s.id === "spindle" ? spindleGap() : textW(fmtH(s.app.hours), DIM.label) / 2 + 22;
+    dimension(P, x + PR.x, x + PR.x + PR.w, y + DIM.y, y + DIM.top, fd, mid - (s.id === "spindle" ? g.l : g), mid + (s.id === "spindle" ? g.r : g), seed + 30);
+    if (s.id === "spindle") { const fs = seg(t, a + 0.32, a + 0.48); if (fs > 0) { const ow = textW("6 MONTHS · 2015", DIM.label); P.line([mid - g.l + 16, y + DIM.y - 3, mid - g.l + 16 + ow + 8, y + DIM.y - 9], { kind: "rule", acc: true, w: 2.2, f: fs, seed: seed + 40 }); } }
+  }
+  const fo = seg(t, a - 0.05, a + 0.8 / sp);
+  if (fo > 0) Ink.drawObject(P, s.app.obj, { cx: x + 1400, cy: y + 370, s: 168, t: t * 1.4, phase: i * 0.7, f: outCubic(fo), seed: 300 + i * 97, fill: camS > 0.42 });
+  const fn = seg(t, a + 0.02, a + 0.72 / sp);
+  if (fn > 0) Type.draw(P, s.name, s.nameSize, x + PR.x, y + 905, { f: outCubic(fn), seed: 600 + i * 131 });
+}
+function spindleGap() { const ow = textW("6 MONTHS · 2015", DIM.label), nw = textW("11.6 h · 2026", DIM.label); const total = ow + 34 + nw; return { l: total / 2 + 20, r: total / 2 + 20, ow, nw, total }; }
+function stationText(M, s, t) {
+  const { x, y } = s.o, a = s.a, sp = s.sp, visited = t >= a - 0.05;
+  setM(M);
+  text(String(s.i + 1).padStart(2, "0"), x + 88, y + 76, 32, visited ? RED : INK, { w: 800, align: "center", alpha: visited ? 1 : 0.7 });
+  if (!visited) return;
+  const ka = seg(t, a + 0.06 / sp, a + 0.3 / sp);
+  if (ka > 0) text(s.kind, x + 160 - 24 * (1 - outCubic(ka)), y + 76, 26, RED, { w: 700, track: 5, alpha: ka });
+  if (s.app.hours) {
+    const mid = x + PR.x + PR.w / 2, ly = y + DIM.y + 14;
+    if (s.id === "spindle") {
+      const g = spindleGap(), oa = seg(t, a + 0.08, a + 0.2);
+      if (oa > 0) text("6 MONTHS · 2015", mid - g.total / 2, ly, DIM.label, INK, { w: 800, alpha: oa });
+      const na = seg(t, a + 0.46, a + 0.56);
+      if (na > 0) text(`${(11.6 * outCubic(seg(FT, a + 0.46, a + 0.8))).toFixed(1)} h · 2026`, mid - g.total / 2 + g.ow + 34, ly, DIM.label, RED, { w: 800, alpha: na });
+    } else {
+      const ca = seg(t, a + 0.12 / sp, a + 0.2 / sp);
+      if (ca > 0) text(fmtH(s.app.hours * outCubic(seg(FT, a + 0.12 / sp, a + 0.62 / sp))), mid, ly, DIM.label, RED, { w: 800, align: "center", alpha: ca });
+    }
+  }
+  const fa = seg(t, a + 0.14 / sp, a + 0.4 / sp);
+  if (fa > 0) {
+    const [n, lab] = s.fact, v = Math.round(n * outCubic(seg(FT, a + 0.14 / sp, a + 0.7 / sp)));
+    text(v.toLocaleString("en-GB"), x + 1140, y + 700, 76, RED, { w: 900, alpha: fa });
+    text(tr(lab).toUpperCase(), x + 1143, y + 748, 24, INK, { w: 700, track: 4, alpha: fa });
+  }
+}
+// the sheet's frame, its zone marks and, at the end, the route the camera took
+const ROUTE = (() => {
+  const bub = (s) => [s.o.x + 88, s.o.y + 64], pts = [];
+  for (let i = 0; i < ST.length; i++) {
+    const A = ST[i], B = ST[i + 1], [ax, ay] = bub(A);
+    pts.push(ax, ay);
+    const end = B ? bub(B) : [TBO.x + 20, TBO.y + 72];
+    const nr = B ? B.r : 2, nc = B ? B.c : 3;
+    if (nr === A.r) { const gy = Math.min(A.o.y, B ? B.o.y : TBO.y) - GY / 2; pts.push(ax, gy, end[0], gy); }
+    else { const gx = Math.min(A.o.x, B.o.x) - GX / 2; pts.push(gx, ay, gx, end[1]); }
+    if (!B) pts.push(end[0], end[1]);
+  }
+  return pts;
+})();
+function dashed(P, pts, f, seed) {
+  let total = 0; const L = [];
+  for (let i = 2; i < pts.length; i += 2) { const l = Math.hypot(pts[i] - pts[i - 2], pts[i + 1] - pts[i - 1]); L.push(l); total += l; }
+  const upto = total * f; let pos = 0, k = 0;
+  for (let i = 0; i < L.length; i++) {
+    const x0 = pts[i * 2], y0 = pts[i * 2 + 1], dx = (pts[i * 2 + 2] - x0) / (L[i] || 1), dy = (pts[i * 2 + 3] - y0) / (L[i] || 1);
+    for (let d = 0; d < L[i]; d += 58) {
+      const s0 = pos + d; if (s0 > upto) return;
+      const e = Math.min(d + 36, L[i], d + (upto - s0));
+      P.line([x0 + dx * d, y0 + dy * d, x0 + dx * e, y0 + dy * e], { kind: "rule", acc: true, w: 1.5, seed: seed + k++ });
+    }
+    pos += L[i];
+  }
+  const n = pts.length, ex = pts[n - 2], ey = pts[n - 1];
+  P.line([ex - 26, ey - 18, ex, ey, ex - 26, ey + 18], { kind: "rule", acc: true, w: 1.8, seed: seed + 999 });
+}
+function sheetInk(P, t) {
+  P.line(rectPts(60, 60, SW - 120, SH - 120), { kind: "rule", w: 1.7, seed: 9001 });
+  P.line(rectPts(88, 88, SW - 176, SH - 176), { kind: "rule", w: 0.8, seed: 9002 });
+  for (let c = 1; c < 4; c++) { const gx = MX + c * (CW + GX) - GX / 2; P.line([gx, 60, gx, 88], { kind: "rule", w: 0.9, seed: 9010 + c }); P.line([gx, SH - 88, gx, SH - 60], { kind: "rule", w: 0.9, seed: 9020 + c }); }
+  for (let r = 1; r < 3; r++) { const gy = MY + r * (CH + GY) - GY / 2; P.line([60, gy, 88, gy], { kind: "rule", w: 0.9, seed: 9030 + r }); P.line([SW - 88, gy, SW - 60, gy], { kind: "rule", w: 0.9, seed: 9040 + r }); }
+  const fr = seg(t, T_PULL[0] + 0.25, T_PULL[1] + 0.15);
+  if (fr > 0) dashed(P, ROUTE, fr, 9100);
+}
+function sheetText(M) {
+  setM(M);
+  for (let c = 0; c < 4; c++) for (const yy of [80, SH - 68]) text(String(c + 1), MX + c * (CW + GX) + CW / 2, yy, 22, INK, { w: 700, align: "center", alpha: 0.75 });
+  for (let r = 0; r < 3; r++) for (const xx of [74, SW - 74]) text("ABC"[r], xx, MY + r * (CH + GY) + CH / 2 + 8, 22, INK, { w: 700, align: "center", alpha: 0.75 });
+}
+// the title block, as on any working drawing
+function titleInk(P, t) {
+  const { x, y } = TBO, fr = outCubic(seg(t, -0.25, 0.45)), fl = outCubic(seg(t, -0.1, 0.5));
+  P.line(rectPts(x + 20, y + 20, 1720, 950), { kind: "rule", w: 1.8, f: fr, seed: 7001 });
+  P.line(rectPts(x + 34, y + 34, 1692, 922), { kind: "rule", w: 0.8, f: fr, seed: 7002 });
+  P.line([x + 20, y + 380, x + 1740, y + 380], { kind: "rule", w: 1.2, f: fl, seed: 7003 });
+  P.line([x + 20, y + 820, x + 1740, y + 820], { kind: "rule", w: 1.2, f: fl, seed: 7004 });
+  for (const [k, cx] of [[0, 470], [1, 920], [2, 1200]]) P.line([x + cx, y + 820, x + cx, y + 970], { kind: "rule", w: 1, f: fl, seed: 7005 + k });
+  P.line([x + 50, y + 100, x + 50 + 1640 * outExpo(seg(t, -0.12, 0.25)), y + 100], { kind: "rule", acc: true, w: 1.7, seed: 7010 });
+  Type.draw(P, "WORKING", 135, x + 50, y + 232, { f: outCubic(seg(t, -0.04, 0.8)), seed: 7100 });
+  Type.draw(P, "DRAWINGS", 135, x + 50, y + 362, { f: outCubic(seg(t, 0.16, 0.98)), seed: 7200 });
+  const fe = seg(t, 17.5, 17.98);
+  if (fe > 0) Type.draw(P, "EVERY DAY", 125, x + 50, y + 640, { f: outCubic(fe), seed: 7300 });
+  const fc = seg(t, 18.42, 18.95);
+  if (fc > 0) P.line(ellipsePts(x + 1462, y + 924, 300, 58), { kind: "rule", acc: true, w: 2, f: inOutCubic(fc), seed: 7400 });
+}
+function titleText(M, t) {
+  const { x, y } = TBO, la = seg(t, 0.12, 0.36), type = (str, u) => str.slice(0, Math.round(str.length * clamp(u)));
+  setM(M);
+  for (const [lab, lx, ly] of [["PROJECT", 50, 78], ["DRAWING", 50, 428], ["CLIENT", 50, 862], ["DRAWN BY", 500, 862], ["DATE", 950, 862], ["ONLINE", 1225, 862]]) text(lab, x + lx, y + ly, 22, RED, { w: 700, track: 5, alpha: la });
+  text("SHEET 01 / 01", x + 1700, y + 428, 22, INK, { w: 700, track: 4, align: "right", alpha: la });
+  text(type("11 APPS · BUILT IN HOURS, NOT YEARS", seg(FT, 0.6, 1.15)), x + 50, y + 490, 30, RED, { w: 700, track: 5 });
+  const vu = seg(FT, 0.85, 1.35);
+  text(type("MEERTENS INSTITUUT", vu), x + 50, y + 935, 30, INK, { w: 700 });
+  text(type("F. KARSDORP + CLAUDE", vu), x + 500, y + 935, 30, INK, { w: 700 });
+  text(type("06 · 11 · 2026", vu), x + 950, y + 935, 30, INK, { w: 700 });
+  text(type("KARSDORP.IO/WORKING-DRAWINGS", vu), x + 1225, y + 935, 27, INK, { w: 700 });
+}
+function drawStamp(M, t) {
+  const u = seg(t, T_STAMP - 0.06, T_STAMP + 0.05);
+  if (u <= 0) return;
+  const after = Math.max(0, t - (T_STAMP + 0.05)), sc = lerp(1.34, 1, outCubic(u)) * (1 + 0.014 * Math.sin(after * 42) * Math.exp(-after * 9));
+  const { cv, bw, bh, cap } = STAMPCV, bx = TBO.x + 50 - STAMP.pad - 6, base = TBO.y + 768;
+  const top = base - cap - STAMP.pad - 6;
+  setM(M); ctx.translate(bx + bw / 2, top + bh / 2); ctx.rotate(-2.2 * DEG); ctx.scale(sc, sc);
+  ctx.globalAlpha = clamp(u * 3) * 0.95; ctx.globalCompositeOperation = "multiply";
+  ctx.drawImage(cv, -bw / 2, -bh / 2, bw, bh);
+  ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+}
+function drawScene(t, tick) {
+  const cam = camAt(t), M = mat(cam, t), vb = viewBox(M);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.filter = "none";
+  ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H); ctx.drawImage(TX.tone, 0, 0);
+  grid(M, vb, cam.s);
+  const live = ST.filter((s) => inView(s.o, vb)), tb = inView(TBO, vb);
+  for (const s of live) drawPrint(M, s, t);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = "multiply"; ctx.drawImage(TX.grain, 0, 0); ctx.globalCompositeOperation = "source-over";
+  const pen = new Ink.Pen("paper", tick, t);
+  pen.k = clamp(0.56 + 0.44 * cam.s, 0.62, 1.04);
+  const P = proxy(pen, M);
+  sheetInk(P, t);
+  for (const s of live) stationInk(P, s, t, cam.s);
+  if (tb) titleInk(P, t);
+  flushInk(pen);
+  sheetText(M);
+  for (const s of live) stationText(M, s, t);
+  if (tb) { titleText(M, t); drawStamp(M, t); }
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.drawImage(TX.vig, 0, 0);
+}
+let FT = 0;   // the frame time: counters and typed text use it, so motion blur never mixes digits
+async function renderFrame(t, still = false) {
+  FT = t;
+  await prepare(t);
+  const ts = subTimes(t, still), tick = Math.floor(t * 12);
+  if (ts.length === 1) return drawScene(t, tick);
+  for (let i = 0; i < ts.length; i++) {
+    drawScene(ts[i], tick);
+    actx.globalCompositeOperation = i ? "source-over" : "copy"; actx.globalAlpha = 1 / (i + 1); actx.drawImage(c, 0, 0);
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "copy"; ctx.drawImage(acc, 0, 0); ctx.globalCompositeOperation = "source-over";
+}
+
+// ---------- cues for the sound (render.py hands these to sound.py) ----------
+const EVENTS = [{ type: "scratch", t0: 0.1, t1: 1.15, pan: -0.2, amt: 0.9 }, { type: "whoosh", t0: T_OPEN, t1: ST[0].a, pan: -1, amt: 1 }];
+ST.forEach((s, i) => {
+  const n = ST[i + 1];
+  EVENTS.push({ type: s.cutIn ? "cut" : "land", t: s.a });
+  EVENTS.push({ type: "scratch", t0: s.a, t1: s.a + 0.75 / s.sp, pan: i % 2 ? 0.3 : -0.3, amt: s.sp > 1 ? 0.7 : 1 });
+  if (n && !n.cutIn) EVENTS.push({ type: "whoosh", t0: s.l, t1: n.a, pan: Math.sign(n.o.x - s.o.x) || (n.r > s.r ? 0 : 0), amt: 0.8 });
+});
+EVENTS.push({ type: "pull", t0: T_PULL[0], t1: T_PULL[1] }, { type: "scratch", t0: T_PULL[0] + 0.25, t1: T_PULL[1] + 0.15, pan: 0, amt: 0.5 },
+  { type: "dive", t0: T_DIVE[0], t1: T_DIVE[1] }, { type: "scratch", t0: 17.5, t1: 17.98, pan: 0, amt: 0.8 },
+  { type: "stamp", t: T_STAMP }, { type: "scratch", t0: 18.42, t1: 18.95, pan: 0.45, amt: 0.8 });
+
+window.ready = (async () => {
+  for (const a of D.apps) img[a.id] = await load("../" + a.shot);
+  await Promise.all(["700", "800", "900"].map((w) => document.fonts.load(`${w} 40px "Geist"`)));
+  TX = paperTextures(); STAMPCV = makeStamp();
+  return true;
+})();
+window.renderFrame = renderFrame; window.EVENTS = EVENTS;
+if (new URLSearchParams(location.search).has("play")) {
+  ready.then(() => { const t0 = performance.now(); const go = async () => { await renderFrame(((performance.now() - t0) / 1000) % DUR, true); requestAnimationFrame(go); }; go(); });
+}
+</script>
+</body>
+</html>

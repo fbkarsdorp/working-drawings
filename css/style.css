@@ -252,6 +252,8 @@ body.idle .keybar:not(.keep), .keybar.off { opacity: 0; }
 body.idle .keybar:not(.keep) button, .keybar.off button { pointer-events: none; }
 
 /* the meta sheet: the deck's own cover, taped on as a print */
+.layer.on .snap { pointer-events: auto; cursor: pointer; border: 0; }
+.snap:hover { filter: brightness(1.03); }
 .snap { box-sizing: border-box; padding: 14px; background: #f7f3e8; transform: rotate(1.6deg);
   box-shadow: 0 1px 1px rgba(40, 30, 20, .10), 0 8px 18px -8px rgba(40, 30, 20, .3); }
 .snap img { display: block; width: 100%; height: auto; }

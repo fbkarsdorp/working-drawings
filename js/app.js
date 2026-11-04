@@ -514,10 +514,13 @@
     const facts = h("div", "facts a4", undefined, { left: px(L), top: px(832), width: px(900) });
     for (const [num, lab] of c.facts) facts.append(h("div", "fact", `<b>${esc(String(fmt(num)))}</b><span>${esc(tr(lab))}</span>`));
     el.append(facts);
-    const snap = h("div", "snap a3", `<img src="${esc(c.shot)}" alt="">`, { left: px(1010), top: px(300), width: px(760) });
-    el.append(snap);
+    const snap = h("button", "snap a3", `<img src="${esc(c.shot)}" alt="">`, { left: px(1010), top: px(300), width: px(760) });
+    const tag = h("button", "opentag lbl a4", esc(tr(D.ui.reel)), { left: px(1010), top: px(300) });
+    tag.dataset.walk = "reel";   // a label of its own: the app check leaves it alone
+    snap.onclick = tag.onclick = () => openReel();
+    el.append(snap, tag);
     return {
-      kind: "meta", el, dur: 2.2, objs: [],
+      kind: "meta", el, dur: 2.2, objs: [], reel: true,
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 1201);
         ticks(pen, f, this.sheet);
@@ -679,18 +682,20 @@
   const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
   const lerpR = (a, b, e) => ({ x: lerp(a.x, b.x, e), y: lerp(a.y, b.y, e), w: lerp(a.w, b.w, e), h: lerp(a.h, b.h, e) });
 
+  const CLIP = () => (box && box.rect) || BIG;
   function placeBox() {
     if (!box) return;
-    const r = box.kind === "clip" ? BIG : LIVE;
+    const r = box.kind === "clip" ? CLIP() : LIVE;
+    Object.assign(cliphit.style, { left: px(CLIP().x), top: px(CLIP().y), width: px(CLIP().w), height: px(CLIP().h) });
     Object.assign(boxui.style, { left: px(r.x), top: px(r.y + r.h + (box.kind === "clip" ? 52 : 34)), width: px(r.w) });
     const w = toWindow(LIVE);
     Object.assign(livewrap.style, { left: px(w.left), top: px(w.top), width: px(w.width), height: px(w.height) });
   }
   function boxLabels() {
     const a = box.app, n = appIndex(a), clip = box.kind === "clip";
-    const left = `<div class="cl"><span class="lbl">${esc(tr(D.ui.fig))} ${pad2(n)}${clip ? "a" : ""}</span><span class="cap">${esc(clip ? tr(box.cap) : a.name)}</span><span class="lbl time">${clip ? "" : esc(a.where)}</span></div>`;
+    const left = `<div class="cl"><span class="lbl">${esc(tr(D.ui.fig))} ${box.fig || pad2(n) + (clip ? "a" : "")}</span><span class="cap">${esc(clip ? tr(box.cap) : a.name)}</span><span class="lbl time">${clip ? "" : esc(a.where)}</span></div>`;
     const right = clip
-      ? `<div class="cr">${box.local ? "" : `<button class="lbl live">${esc(tr(D.ui.live))}</button>`}<button class="lbl back">${esc(tr(D.ui.backclip))}</button></div>${box.local ? `<div class="lbl localnote">${esc(tr(D.ui.local))}</div>` : ""}`
+      ? `<div class="cr">${box.local || box.solo ? "" : `<button class="lbl live">${esc(tr(D.ui.live))}</button>`}<button class="lbl back">${esc(tr(D.ui.backclip))}</button></div>${box.local ? `<div class="lbl localnote">${esc(tr(D.ui.local))}</div>` : ""}`
       : `<div class="cr"><button class="lbl full">${esc(tr(D.ui.full))}</button><button class="lbl tab">${esc(tr(D.ui.tab))}</button><button class="lbl back">${esc(tr(D.ui.backbox))}</button></div>`;
     boxui.innerHTML = left + right;
     boxui.querySelector(".back").onclick = closeBox;
@@ -730,10 +735,21 @@
     }
     openBox(a, from, "live", S);
   }
+  // the reel, laid out like the walk: 16:9, with sound, no live app behind it
+  const REELR = { x: 240, y: 100, w: 1440, h: 810 };
+  let reelVideo = null;
+  function openReel() {
+    const S = slides[cur], c = D.meta;
+    if (!S.reel || box || openA) return;
+    if (!reelVideo) { reelVideo = document.createElement("video"); reelVideo.src = c.reel; reelVideo.playsInline = true; reelVideo.preload = "auto"; }
+    reelVideo.muted = false;
+    imgs.reel = imgs.reel || Object.assign(new Image(), { src: c.shot });
+    openBox({ id: "reel", name: "Working Drawings" }, { x: 1024, y: 314, w: 732, h: 412 }, "clip", S, { video: reelVideo, cap: c.reelCap, solo: true, rect: REELR, fig: "12" });
+  }
   function openBox(a, from, kind, S, o = {}) {
     if (box || openA) return;
     S = S || slides[cur];
-    box = { app: a, S, from, kind, t0: now, closing: false, morph: null, video: o.video || S.video, cap: o.cap || D.cabinet.walk, local: !!o.local };
+    box = { app: a, S, from, kind, t0: now, closing: false, morph: null, video: o.video || S.video, cap: o.cap || D.cabinet.walk, local: !!o.local, solo: !!o.solo, rect: o.rect, fig: o.fig };
     if (kind === "clip") {
       const v = box.video;
       v.loop = false; v.currentTime = 0; v.play().catch(() => {});
@@ -744,12 +760,12 @@
     boxui.hidden = false; boxui.classList.remove("ended");
     requestAnimationFrame(() => boxui.classList.add("on"));
     slides[cur].el.classList.add("dim");
-    slides[cur].el.classList.toggle("clear", box.local); // a recorded app: no sheet text over it
+    slides[cur].el.classList.toggle("clear", box.local || box.solo); // a recording: no sheet text over it
   }
   // the walk becomes the room itself, in the same place on the page
   function boxToLive() {
     if (!box || box.kind !== "clip") return;
-    if (box.local) return;
+    if (box.local || box.solo) return;
     box.video.pause();
     box.kind = "live"; box.morph = now;
     cliphit.hidden = true;
@@ -783,7 +799,7 @@
   }
   // where the box stands now: travelling out of its print, or settled
   function boxRect(u) {
-    const target = box.kind === "clip" ? BIG : LIVE;
+    const target = box.kind === "clip" ? CLIP() : LIVE;
     if (box.morph !== null) return lerpR(BIG, LIVE, ease(clamp((now - box.morph) / 0.55)));
     return lerpR(box.from, target, u);
   }
@@ -815,7 +831,7 @@
       ctx.filter = "none";
       // a recorded app (light screens) settles into a plain, opaque picture, so the sheet
       // underneath does not show through and pale details stay readable
-      if (box.local && u > 0.6) {
+      if ((box.local || box.solo) && u > 0.6) {
         ctx.globalCompositeOperation = "source-over";
         ctx.globalAlpha = ease(clamp((u - 0.6) / 0.4));
         ctx.drawImage(src, 0, 0, sw, sh, r.x, r.y, r.w, r.h);
@@ -827,12 +843,12 @@
     frame(pen, r.x, r.y, r.w, r.h, clamp(u * 1.5), 4100);
     if (box.kind === "clip" && u > 0.4 && v && v.duration) {
       // the timeline, drawn as a dimension line
-      const fu = clamp((u - 0.4) / 0.6), ty = BIG.y + BIG.h + 30, x1 = BIG.x + BIG.w * fu;
-      const at = BIG.x + BIG.w * clamp(v.currentTime / v.duration);
-      rule(pen, BIG.x, ty, x1, ty, 1, 4200, { w: 0.8 });
-      rule(pen, BIG.x, ty - 9, BIG.x, ty + 9, fu, 4201, { w: 0.8 });
-      if (fu >= 1) rule(pen, BIG.x + BIG.w, ty - 9, BIG.x + BIG.w, ty + 9, 1, 4202, { w: 0.8 });
-      if (at > BIG.x + 2) pen.line([BIG.x, ty, Math.min(at, x1), ty], { kind: "rule", acc: true, w: 1.6, seed: 4203 });
+      const C = CLIP(), fu = clamp((u - 0.4) / 0.6), ty = C.y + C.h + 30, x1 = C.x + C.w * fu;
+      const at = C.x + C.w * clamp(v.currentTime / v.duration);
+      rule(pen, C.x, ty, x1, ty, 1, 4200, { w: 0.8 });
+      rule(pen, C.x, ty - 9, C.x, ty + 9, fu, 4201, { w: 0.8 });
+      if (fu >= 1) rule(pen, C.x + C.w, ty - 9, C.x + C.w, ty + 9, 1, 4202, { w: 0.8 });
+      if (at > C.x + 2) pen.line([C.x, ty, Math.min(at, x1), ty], { kind: "rule", acc: true, w: 1.6, seed: 4203 });
       pen.line([Math.min(at, x1), ty - 13, Math.min(at, x1), ty + 13], { kind: "rule", acc: true, w: 2.2, seed: 4204 });
       const tl = boxui.querySelector(".time");
       if (tl) tl.textContent = `${mmss(v.currentTime)} / ${mmss(v.duration)}`;
@@ -1078,7 +1094,7 @@
     else if (["ArrowLeft", "PageUp", "Backspace", "ArrowUp"].includes(k)) { e.preventDefault(); go(cur - 1); }
     else if (k === "Home") go(0);
     else if (k === "End") go(slides.findIndex((s) => s.kind === "end"));
-    else if (k === "Enter") { const S = slides[cur]; if (S.app) { if (e.shiftKey) window.open(S.app.url, "_blank"); else present(S.app, PR, S); } else go(cur + 1); }
+    else if (k === "Enter") { const S = slides[cur]; if (S.reel) openReel(); else if (S.app) { if (e.shiftKey) window.open(S.app.url, "_blank"); else present(S.app, PR, S); } else go(cur + 1); }
     else if (k === "i" || k === "a" || k === "Tab") {
       e.preventDefault();
       const ix = slides.findIndex((s) => s.kind === "index");

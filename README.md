@@ -97,6 +97,18 @@ Dwaallicht and Wat bewaart het Meertens are not in the logs. Nachtdienst also bu
 36.5 h spent on its 3D predecessor. The quotes on *What is scarce* are verbatim prompts
 from those logs. The data routes were read from each project's README and pipeline.
 
+## The reel
+
+On *This deck*, the taped print is a 20-second reel of all eleven apps: ↵ (or a click) lays it
+out on the page and plays it with sound, Esc puts it back. It is the whole deck as one working
+drawing, drawn with the deck's own pencil engine; the sound is synthesised to the picture.
+Sources are in `reel/` (`index.html` is the timeline, `sound.py` the sound); rebuild with
+
+    uv run -q --with playwright --with numpy --with scipy python reel/render.py
+
+which writes `reel/working-drawings-reel.mp4` (plus `-small` and `-silent`, not committed).
+Copy the small one to `shots/reel.mp4` for the deck.
+
 ## The walk-through clip
 
 `shots/museum-walk.mp4` was recorded from the Museum's dev server (port 5191), using its

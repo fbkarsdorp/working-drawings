@@ -213,10 +213,13 @@ window.DECK = {
     right: { en: "Made the same way", nl: "Op dezelfde manier gemaakt" },
     big: { en: ["THIS DECK"], nl: ["DEZE PRESENTATIE"] },
     text: {
-      en: "Claude drew every sheet, wrote the code and recorded the demos. What to say, and what not to say, came from me.",
-      nl: "Claude tekende elk blad, schreef de code en nam de demo's op. Wat er gezegd moest worden, en wat niet, kwam van mij.",
+      en: "Claude drew every sheet, wrote the code, recorded the demos and cut the reel. What to say, and what not to say, came from me.",
+      nl: "Claude tekende elk blad, schreef de code, nam de demo's op en monteerde de film. Wat er gezegd moest worden, en wat niet, kwam van mij.",
     },
-    shot: "shots/deck.jpg",
+    // the reel (reel/, rendered with the deck's own engine): the 15 MB copy, and a still of the whole sheet
+    shot: "shots/reel.jpg",
+    reel: "shots/reel.mp4",
+    reelCap: { en: "Working Drawings, in 20 seconds", nl: "Werktekeningen in 20 seconden" },
     facts: [[5.8, { en: "hours of conversation", nl: "uur gesprek" }], [64, { en: "prompts", nl: "prompts" }], [2, { en: "languages", nl: "talen" }]],
   },
 
@@ -430,6 +433,7 @@ window.DECK = {
   ui: {
     open: { en: "↵ Open", nl: "↵ Openen" },
     watch: { en: "↵ Watch the walk", nl: "↵ Bekijk de wandeling" },
+    reel: { en: "↵ Watch the reel · sound on", nl: "↵ Bekijk de film · met geluid" },
     demo: { en: "↵ Watch the demo", nl: "↵ Bekijk de demo" },
     local: { en: "Recording · the app runs on the presenter's laptop", nl: "Opname · de toepassing draait op de laptop van de spreker" },
     live: { en: "Go in live ↵", nl: "Zelf naar binnen ↵" },
