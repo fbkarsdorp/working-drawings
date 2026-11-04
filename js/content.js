@@ -135,10 +135,6 @@ window.DECK = {
     label: { en: "Lesson 1 · What is scarce", nl: "Les 1 · Wat schaars is" },
     big: { en: ["WHAT IS SCARCE"], nl: ["WAT SCHAARS IS"] },
     right: { en: "I chose what to make, Claude made it", nl: "Ik koos wat te maken, Claude maakte het" },
-    outside: {
-      quotes: ["My rare and valuable skill was still valuable but no longer rare.", "Imagination got more intriguing results than experience."],
-      src: { en: "Lincoln Mullen · Behind, ahead · March 2026", nl: "Lincoln Mullen · Behind, ahead · maart 2026" },
-    },
     shift: {
       en: "I expect a transition in which problem setting becomes more important than problem solving.",
       nl: "Ik verwacht een verschuiving waarin problemen stellen belangrijker wordt dan problemen oplossen.",
@@ -161,8 +157,8 @@ window.DECK = {
       },
     ],
     finding: {
-      en: "Each choice takes knowing the collection, and nobody knows these collections better than the institute.",
-      nl: "Elke keuze vraagt kennis van de collectie, en niemand kent die beter dan het instituut.",
+      en: "These apps only work if you know the collections well, or if the documentation is good enough for the models to use.",
+      nl: "Deze toepassingen werken alleen als je de collecties goed kent, of als de documentatie goed genoeg is om de modellen ermee te laten werken.",
     },
   },
 
@@ -221,7 +217,7 @@ window.DECK = {
       nl: "Claude tekende elk blad, schreef de code en nam de demo's op. Wat er gezegd moest worden, en wat niet, kwam van mij.",
     },
     shot: "shots/deck.jpg",
-    facts: [[4.6, { en: "hours of conversation", nl: "uur gesprek" }], [40, { en: "prompts", nl: "prompts" }], [2, { en: "languages", nl: "talen" }]],
+    facts: [[5.8, { en: "hours of conversation", nl: "uur gesprek" }], [64, { en: "prompts", nl: "prompts" }], [2, { en: "languages", nl: "talen" }]],
   },
 
   end: {

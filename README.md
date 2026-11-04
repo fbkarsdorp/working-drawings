@@ -24,8 +24,9 @@ it moves on to the next free one and opens the deck there. Press `F` for full sc
    Click one to open it.
 6. **Hours, not years**: hours of conversation per app, from the Claude Code logs. Judge the
    apps by what they make visible, not by how hard they were to build.
-7. **What is scarce**: Lincoln Mullen's two lines, the shift from problem solving to problem
-   setting, and three choices that took knowing the collection.
+7. **What is scarce**: the shift from problem solving to problem setting, three choices that
+   took knowing the collection, and why: these apps only work if you know the collections, or
+   if the documentation is good enough for the models to use.
 8. **Data is the interface**: given the data, anyone can build their own perspective; the
    databank becomes the foundation others interpret from. The ring shows where each app got
    its data (solid: dump, export or download; dashed: scraped or parsed).

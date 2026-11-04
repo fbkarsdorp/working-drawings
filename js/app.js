@@ -424,15 +424,13 @@
     const tb = titleBlock(tr(c.big), 154, R - L, 170);
     const el = h("section", "layer ink-paper scarce");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
-    const ov = c.outside;
-    el.append(h("div", "outside a2", `${ov.quotes.map((q) => `<q>${esc(q)}</q>`).join(" ")}<span class="lbl">${esc(tr(ov.src))}</span>`, { left: px(L), top: px(tb.bottom + 26), width: px(R - L) }));
-    el.append(h("div", "shift a3", esc(tr(c.shift)), { left: px(L), top: px(tb.bottom + 122), width: px(R - L) }));
-    const top = 540, cw = (R - L) / 3;
+    el.append(h("div", "shift a2", esc(tr(c.shift)), { left: px(L), top: px(tb.bottom + 30), width: px(R - L) }));
+    const top = 480, cw = (R - L) / 3;
     c.cols.forEach((col, i) => {
       const x = L + i * cw + (i ? 40 : 0);
       el.append(h("div", "scol a" + (i + 3), `<span class="lbl">${esc(col.apps)}</span><b>${esc(tr(col.head))}</b><span class="stext">${esc(tr(col.text))}</span>`, { left: px(x), top: px(top + 100), width: px(cw - 80) }));
     });
-    el.append(h("div", "sfinding a5", esc(tr(c.finding)), { left: px(L), top: px(B - 50), width: px(R - L) }));
+    el.append(h("div", "sfinding a5", esc(tr(c.finding)), { left: px(L), top: px(B - 86), width: px(R - L) }));
     const keyOf = (obj) => D.apps.find((a) => a.obj === obj).id;
     return {
       kind: "scarce", el, dur: 2.6,
@@ -441,8 +439,8 @@
         drawTitle(pen, tb, clamp(f * 1.3), 601);
         ticks(pen, f, this.sheet);
         rule(pen, L, top - 14, R, top - 14, clamp(f * 2 - 0.4), 602);
-        rule(pen, L, B - 72, R, B - 72, clamp(f * 2 - 0.8), 603);
-        for (let k = 1; k < 3; k++) rule(pen, L + k * cw, top, L + k * cw, B - 88, clamp(f * 2 - 0.6), 604 + k);
+        rule(pen, L, B - 108, R, B - 108, clamp(f * 2 - 0.8), 603);
+        for (let k = 1; k < 3; k++) rule(pen, L + k * cw, top, L + k * cw, B - 124, clamp(f * 2 - 0.6), 604 + k);
       },
     };
   }
