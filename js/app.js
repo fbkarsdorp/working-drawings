@@ -185,10 +185,10 @@
     x.globalAlpha = 1;
     return cv;
   }
-  function takeaway(x, y, w, rot, cls) {
+  function takeaway(x, y, w, rot, cls, label) {
     const c = D.share, card = h("div", "takeaway " + cls, undefined, { left: px(x), top: px(y), width: px(w) });
     card.style.setProperty("--rot", rot + "deg");
-    card.append(h("span", "lbl", esc(tr(c.label))), qrCanvas(c.qr, w - 84, Math.round(x + y)), h("span", "url", `${esc(c.show)}<small>${esc(tr(c.hint))}</small>`));
+    card.append(h("span", "lbl", esc(tr(label || c.label))), qrCanvas(c.qr, w - 84, Math.round(x + y)), h("span", "url", `${esc(c.show)}<small>${esc(tr(c.hint))}</small>`));
     return card;
   }
   // the card is laid on the sheet last, once the pencil drawing is (nearly) done
@@ -362,10 +362,13 @@
   // 4 · the explorations, as a contact sheet
   function explorationsSlide() {
     const c = D.explorations, apps = D.apps.filter((a) => a.role === "exploration");
-    const tb = titleBlock(tr(c.big), 154, R - L, 170);
+    const tb = titleBlock(tr(c.big), 154, 1300, 170);
     const el = h("section", "layer ink-paper contact");
     labelRow(el, esc(tr(c.label)), esc(tr(c.right)));
-    el.append(h("div", "sheet-text a2", esc(tr(c.text)), { left: px(L), top: px(tb.bottom + 30), width: px(1500) }));
+    el.append(h("div", "sheet-text a2", esc(tr(c.text)), { left: px(L), top: px(tb.bottom + 30), width: px(1300) }));
+    // the address again, for whoever did not take it from the cover: try the apps yourselves
+    const card = takeaway(1522, 150, 228, -1.8, "", D.share.try);
+    el.append(card);
     const top = 420, cols = 5, gx = (R - L) / cols, gy = (B - top) / 2;
     const objs = [];
     apps.forEach((a, i) => {
@@ -380,6 +383,7 @@
       kind: "contact", el, dur: 2.4, objs,
       draw(pen, t, f) {
         drawTitle(pen, tb, clamp(f * 1.3), 401);
+        reveal(card, f, 0.75);
         ticks(pen, f, this.sheet);
         for (let r = 0; r <= 2; r++) rule(pen, L, top + r * gy, R, top + r * gy, clamp(f * 2 - 0.3 - r * 0.1), 410 + r, { w: 0.6 });
         for (let k = 1; k < cols; k++) rule(pen, L + k * gx, top, L + k * gx, B, clamp(f * 2 - 0.5), 420 + k, { w: 0.6 });

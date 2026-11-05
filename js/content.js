@@ -22,6 +22,7 @@ window.DECK = {
     url: "https://karsdorp.io/working-drawings/",
     show: "karsdorp.io/working-drawings",
     label: { en: "Take the drawings home", nl: "Neem de tekeningen mee" },
+    try: { en: "Try them yourself", nl: "Probeer ze zelf" },   // the card on Experiments
     hint: { en: "Best on a laptop", nl: "Het mooist op een laptop" },
     // shown instead of the deck on a phone-sized screen
     phone: {
