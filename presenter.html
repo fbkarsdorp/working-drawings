@@ -58,7 +58,7 @@
         <video id="mirror" autoplay muted playsinline hidden></video>
         <div class="start" id="start">
           <button class="btn" id="share">Show the deck here</button>
-          <div class="hint">Chrome asks what to show: pick the <b>Chrome tab</b> with the deck (or the projector's screen). Nothing leaves this laptop.</div>
+          <div class="hint" id="hint">Your browser asks what to show. <b>Chrome:</b> pick the tab with the deck. <b>Firefox:</b> pick the deck's window, or the projector's screen. Nothing leaves this laptop.</div>
         </div>
       </div>
       <div class="next"><span class="lbl">Next</span>&nbsp; <span id="next">—</span></div>
@@ -153,7 +153,14 @@
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: "browser", frameRate: 30 }, audio: false, selfBrowserSurface: "exclude", preferCurrentTab: false });
       const v = $("mirror"); v.srcObject = stream; v.hidden = false; $("start").hidden = true;
       stream.getVideoTracks()[0].addEventListener("ended", () => { v.hidden = true; $("start").hidden = false; });
-    } catch (e) { /* cancelled */ }
+    } catch (e) {
+      // say why, so it can be fixed before the talk instead of guessed at
+      const firefox = /firefox/i.test(navigator.userAgent);
+      $("hint").innerHTML = e.name === "NotAllowedError" && firefox
+        ? "Firefox was not allowed to share the screen. On a Mac: System Settings → Privacy &amp; Security → <b>Screen &amp; System Audio Recording</b> → switch on Firefox, quit and reopen Firefox, then try again."
+        : e.name === "NotAllowedError" ? "Sharing was cancelled or not allowed. Try again, and pick the deck."
+        : `Sharing did not start (${esc(e.name || "error")}). Try again, and pick the deck.`;
+    }
   }
   $("share").onclick = share;
   const FWD = ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "PageUp", "PageDown", " ", "Enter", "Escape", "Home", "End", "Backspace", "a", "i", "l", "h"];
