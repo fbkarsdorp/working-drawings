@@ -69,6 +69,22 @@ live as before.
 Speaker cues are in `notes.md` (one section per sheet). It is in `.gitignore`, so it stays on
 this laptop and never goes online; print it or open it on a phone next to you.
 
+### Presenter view (experimental)
+
+With the projector as a separate screen (System Settings → Displays: *Extended*): run
+`./serve.sh`, drag the deck to the projector and press `F` there, then press `P`. A presenter
+window opens; keep it on the laptop, in front.
+
+- *Show the deck here*: Chrome asks what to show; pick the tab with the deck. The left side
+  then shows exactly what is projected, live apps and videos included.
+- On the right: your notes for the sheet from `notes.md`, matched by heading name (a heading
+  that names no sheet, like *Atlas*, belongs to the sheet above it). Edits show at the next sheet.
+- Your clicker and the keys in this window move the deck (→ ← ␣ ↵ Esc A L). `T` restarts the
+  timer (it starts when you leave the cover), `+`/`−` change the text size.
+
+To remove it: delete `presenter.html` and `js/presenter-hook.js`, and the `<script>` line for the
+hook in `index.html` (or `git revert` the commit that added it). Nothing else depends on it.
+
 ## Keys
 
 A small legend at the bottom right of every sheet shows the main keys and can be clicked
