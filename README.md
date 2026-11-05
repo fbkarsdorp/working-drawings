@@ -75,10 +75,10 @@ With the projector as a separate screen (System Settings → Displays: *Extended
 `./serve.sh`, drag the deck to the projector and press `F` there, then press `P`. A presenter
 window opens; keep it on the laptop, in front.
 
-- On the left: a copy of the deck that follows your sheets (no permissions, any browser). It
-  does not show an app or video you open on the projector; for that, use *Exact copy (screen
-  share)* and pick the deck (Chrome: its tab; Firefox: its window or the projector screen, after
-  allowing Firefox in System Settings → Privacy & Security → Screen & System Audio Recording).
+- *Show the deck here*: pick the deck (Chrome: its tab; Firefox: its window or the projector screen,
+  after allowing Firefox in System Settings → Privacy & Security → Screen & System Audio
+  Recording). The left side
+  then shows exactly what is projected, live apps and videos included.
 - On the right: your notes for the sheet from `notes.md`, matched by heading name (a heading
   that names no sheet, like *Atlas*, belongs to the sheet above it). Edits show at the next sheet.
 - Your clicker and the keys in this window move the deck (→ ← ␣ ↵ Esc A L). `T` restarts the

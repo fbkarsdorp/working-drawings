@@ -23,11 +23,10 @@
     main { display: grid; grid-template-columns: minmax(0, 56fr) minmax(0, 44fr); min-height: 0; }
     .left { padding: 18px 20px 18px 24px; display: flex; flex-direction: column; gap: 14px; min-height: 0; border-right: 1.5px solid var(--ink); }
     .screen { position: relative; aspect-ratio: 16 / 9; width: 100%; background: #d9d1bd; box-shadow: 0 1px 1px rgba(40, 30, 20, .1), 0 8px 18px -8px rgba(40, 30, 20, .35); }
-    .screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
     .screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #111; }
     .screen video[hidden] { display: none; }
-    .share { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-    .share button { border: 0; background: none; padding: 0; font: 700 13px/1.4 "Geist", system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--red); cursor: pointer; text-decoration: underline; }
+    .screen .start { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 20px; }
+    .screen .start[hidden] { display: none; }
     .btn { border: 0; background: var(--ink); color: var(--card); padding: 12px 18px; font: 700 15px/1 "Geist", system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
     .hint { font-size: 14px; color: var(--soft); max-width: 460px; line-height: 1.4; }
     .lbl { font-weight: 700; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--red); }
@@ -56,10 +55,12 @@
   <main>
     <section class="left">
       <div class="screen">
-        <iframe id="copy" src="index.html?mirror" title="The deck, following along" tabindex="-1"></iframe>
         <video id="mirror" autoplay muted playsinline hidden></video>
+        <div class="start" id="start">
+          <button class="btn" id="share">Show the deck here</button>
+          <div class="hint" id="hint">Your browser asks what to show. <b>Chrome:</b> pick the tab with the deck. <b>Firefox:</b> pick the deck's window, or the projector's screen. Nothing leaves this laptop.</div>
+        </div>
       </div>
-      <div class="share"><button id="share">Exact copy (screen share)</button><span class="hint" id="hint">Optional. The copy above follows your sheets but not an opened app or video; screen sharing shows exactly what is projected. Chrome: pick the deck's tab. Firefox: pick its window or the projector screen.</span></div>
       <div class="next"><span class="lbl">Next</span>&nbsp; <span id="next">—</span></div>
       <div class="keys">Keys here move the deck too: → ← ␣ · ↵ · Esc · A · L. &nbsp;T restarts the timer · + − text size.<br>Keep this window in front; press F once in the deck window on the projector for full screen.</div>
     </section>
@@ -148,13 +149,10 @@
   load().then(() => chan.postMessage({ hello: true }));
   // the live copy: Chrome's own tab capture, so live apps and videos show exactly as projected
   async function share() {
-    $("hint").textContent = "Waiting for your browser's sharing dialog (near the address bar)…";
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: "browser", frameRate: 30 }, audio: false, selfBrowserSurface: "exclude", preferCurrentTab: false });
-      const v = $("mirror"); v.srcObject = stream; v.hidden = false; v.play().catch(() => {});
-      $("share").textContent = "Stop screen share"; $("share").onclick = () => stream.getTracks().forEach((t) => t.stop());
-      $("hint").textContent = "Showing exactly what is projected.";
-      stream.getVideoTracks()[0].addEventListener("ended", () => { v.hidden = true; v.srcObject = null; $("share").textContent = "Exact copy (screen share)"; $("share").onclick = share; $("hint").textContent = "Screen share stopped; the copy follows your sheets again."; });
+      const v = $("mirror"); v.srcObject = stream; v.hidden = false; $("start").hidden = true;
+      stream.getVideoTracks()[0].addEventListener("ended", () => { v.hidden = true; $("start").hidden = false; });
     } catch (e) {
       // say why, so it can be fixed before the talk instead of guessed at
       const firefox = /firefox/i.test(navigator.userAgent);
